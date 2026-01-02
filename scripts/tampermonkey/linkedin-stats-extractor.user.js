@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         LinkedIn Stats Extractor
 // @namespace    http://tampermonkey.net/
-// @version      1.1.0
-// @description  Extract LinkedIn dashboard stats and export as JSON (with debug mode)
+// @version      1.2.0
+// @description  Extract LinkedIn dashboard stats with manual edit capability
 // @author       Alessandro Middei
 // @match        https://www.linkedin.com/dashboard/
 // @match        https://www.linkedin.com/dashboard/*
@@ -95,13 +95,13 @@
                     .join(" ");
 
                 // Profile views detection
-                if (text.match(/profil.*view|chi.*visualizz|who.*view/i)) {
+                if (text.match(/profil.*view|chi.*visualizz|who.*view|visualizzazioni.*profil|hanno.*visitato/i)) {
                     debugInfo.push(`Profile views card found: ${text.substring(0, 100)}`);
                     const numbers = extractAllNumbers(el);
                     debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
-                    if (numbers.length >= 1) stats.profile_views_7d = numbers[0];
-                    if (numbers.length >= 2) stats.profile_views_30d = numbers[1];
-                    if (numbers.length >= 3) stats.profile_views_90d = numbers[2];
+                    if (numbers.length >= 1) stats.profile_views_7d = Math.max(stats.profile_views_7d, numbers[0]);
+                    if (numbers.length >= 2) stats.profile_views_30d = Math.max(stats.profile_views_30d, numbers[1]);
+                    if (numbers.length >= 3) stats.profile_views_90d = Math.max(stats.profile_views_90d, numbers[2]);
                 }
 
                 // Post impressions
@@ -241,15 +241,67 @@
                 color: #0aff9d; border: 1px solid #333;
                 padding: 15px; font-family: monospace; margin-bottom: 15px;
             ">${json}</textarea>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button id="copy-json-btn" style="padding: 10px 20px; background: linear-gradient(135deg, #0aff9d, #00d4ff); color: #0f0f0f; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">📋 Copy JSON</button>
-                <button id="download-json-btn" style="padding: 10px 20px; background: linear-gradient(135deg, #00d4ff, #0aff9d); color: #0f0f0f; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Download JSON</button>
-                <button id="close-modal-btn" style="padding: 10px 20px; background: #333; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Close</button>
+            <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
+                <button id="manual-edit-btn" style="padding: 10px 20px; background: #555; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">✏️ Edit Values</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="copy-json-btn" style="padding: 10px 20px; background: linear-gradient(135deg, #0aff9d, #00d4ff); color: #0f0f0f; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">📋 Copy JSON</button>
+                    <button id="download-json-btn" style="padding: 10px 20px; background: linear-gradient(135deg, #00d4ff, #0aff9d); color: #0f0f0f; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Download JSON</button>
+                    <button id="close-modal-btn" style="padding: 10px 20px; background: #333; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Close</button>
+                </div>
             </div>
         `;
 
         modal.appendChild(content);
         document.body.appendChild(modal);
+
+        document.getElementById("manual-edit-btn").addEventListener("click", () => {
+            const editedStats = { ...stats };
+            
+            const promptValue = (label, currentValue) => {
+                const input = prompt(`${label} (current: ${currentValue})`, currentValue);
+                if (input === null) return null; // User cancelled
+                const num = parseFloat(input);
+                return isNaN(num) ? currentValue : num;
+            };
+
+            const newProfileViews7d = promptValue("Profile Views (7 days)", editedStats.profile_views_7d);
+            if (newProfileViews7d === null) return;
+            editedStats.profile_views_7d = newProfileViews7d;
+
+            const newProfileViews30d = promptValue("Profile Views (30 days)", editedStats.profile_views_30d);
+            if (newProfileViews30d === null) return;
+            editedStats.profile_views_30d = newProfileViews30d;
+
+            const newProfileViews90d = promptValue("Profile Views (90 days)", editedStats.profile_views_90d);
+            if (newProfileViews90d === null) return;
+            editedStats.profile_views_90d = newProfileViews90d;
+
+            const newSearchAppear7d = promptValue("Search Appearances (7 days)", editedStats.search_appearances_7d);
+            if (newSearchAppear7d === null) return;
+            editedStats.search_appearances_7d = newSearchAppear7d;
+
+            const newSearchAppear30d = promptValue("Search Appearances (30 days)", editedStats.search_appearances_30d);
+            if (newSearchAppear30d === null) return;
+            editedStats.search_appearances_30d = newSearchAppear30d;
+
+            const newConnGrowth = promptValue("Connection Growth (7 days)", editedStats.connection_growth_7d);
+            if (newConnGrowth === null) return;
+            editedStats.connection_growth_7d = newConnGrowth;
+
+            // Recalculate engagement rate
+            if (editedStats.followers > 0 && editedStats.post_impressions_7d > 0) {
+                editedStats.engagement_rate = parseFloat(((editedStats.post_impressions_7d / editedStats.followers) * 100).toFixed(2));
+            }
+
+            const editedOutput = {
+                stats: editedStats,
+                extracted_at: new Date().toISOString(),
+                note: "Extracted from LinkedIn Dashboard (manually edited)"
+            };
+
+            const editedJson = JSON.stringify(editedOutput, null, 2);
+            showResultModal(editedJson, editedStats, [`Manually edited values at ${new Date().toISOString()}`]);
+        });
 
         document.getElementById("copy-json-btn").addEventListener("click", () => {
             navigator.clipboard.writeText(json).then(() => {
