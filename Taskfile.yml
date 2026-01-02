@@ -63,3 +63,30 @@ tasks:
     desc: Open shell in frontend container
     cmds:
       - docker-compose exec frontend /bin/sh
+
+  import-stats:
+    desc: Import LinkedIn stats from JSON file
+    cmds:
+      - python3 scripts/update_stats_from_json.py {{.CLI_ARGS}}
+      - echo "✅ Stats imported successfully"
+      - echo "Run 'task restart' to apply changes"
+
+  import-posts:
+    desc: Import LinkedIn posts from JSON file
+    cmds:
+      - python3 scripts/update_posts_from_json.py {{.CLI_ARGS}}
+      - echo "✅ Posts imported successfully"
+      - echo "Run 'task restart' to apply changes"
+
+  update-linkedin:
+    desc: Complete LinkedIn data update workflow
+    cmds:
+      - echo "📋 LinkedIn Data Update Workflow"
+      - echo "================================"
+      - echo "1. Extract stats with Tampermonkey -> linkedin-stats-YYYY-MM-DD.json"
+      - echo "2. Extract posts with Tampermonkey -> linkedin-posts-YYYY-MM-DD.json"
+      - echo "3. Run -> task import-stats -- ~/Downloads/linkedin-stats-*.json"
+      - echo "4. Run -> task import-posts -- ~/Downloads/linkedin-posts-*.json"
+      - echo "5. Run -> task restart"
+      - echo ""
+      - echo "Tampermonkey scripts located in: scripts/tampermonkey/"
