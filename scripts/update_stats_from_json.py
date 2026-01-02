@@ -70,14 +70,41 @@ def show_diff(old_stats: dict, new_stats: dict):
     
     print("-" * 60)
 
+def find_latest_stats_file() -> str:
+    """Find the latest linkedin-stats-*.json in data_tmp/"""
+    data_tmp = Path(__file__).parent.parent / "data_tmp"
+    if not data_tmp.exists():
+        return None
+    
+    stats_files = list(data_tmp.glob("linkedin-stats-*.json"))
+    if not stats_files:
+        return None
+    
+    # Sort by modification time, most recent first
+    stats_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return str(stats_files[0])
+
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 scripts/update_stats_from_json.py <json_file>")
+    if len(sys.argv) == 1:
+        # No argument: try to find latest file in data_tmp/
+        input_file = find_latest_stats_file()
+        if not input_file:
+            print("❌ No linkedin-stats-*.json file found in data_tmp/")
+            print("\nUsage: python3 scripts/update_stats_from_json.py [<stats_json_file>]")
+            print("\nOptions:")
+            print("  1. Place JSON file in data_tmp/ and run without arguments")
+            print("  2. Provide explicit path:")
+            print("     python3 scripts/update_stats_from_json.py ~/Downloads/linkedin-stats-2026-01-02.json")
+            sys.exit(1)
+        print(f"🔍 Auto-detected: {Path(input_file).name}")
+    elif len(sys.argv) == 2:
+        input_file = sys.argv[1]
+    else:
+        print("Usage: python3 scripts/update_stats_from_json.py [<stats_json_file>]")
         print("\nExample:")
         print("  python3 scripts/update_stats_from_json.py ~/Downloads/linkedin-stats-2026-01-02.json")
+        print("  python3 scripts/update_stats_from_json.py  # Auto-finds latest in data_tmp/")
         sys.exit(1)
-    
-    input_file = sys.argv[1]
     
     print("🔄 LinkedIn Stats Importer")
     print("=" * 60)

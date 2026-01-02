@@ -1,6 +1,14 @@
-# LinkedIn Stats Extractor - Tampermonkey Script
+# Tampermonkey Scripts for KapiHome
 
-Userscript per estrarre automaticamente le statistiche dal dashboard LinkedIn.
+Userscripts per estrarre automaticamente dati da LinkedIn ed Exercism.
+
+## 📊 LinkedIn Stats & Posts Extractor
+
+Due script separati per estrarre statistiche e post da LinkedIn.
+
+### 🔢 LinkedIn Stats Extractor
+
+Estrae le statistiche dal dashboard LinkedIn.
 
 ## Installazione
 
@@ -135,9 +143,150 @@ LinkedIn aggiorna frequentemente il layout. Se lo script smette di funzionare:
    const viewsCards = document.querySelectorAll('[nuovi-selettori]');
    ```
 
+### 📝 LinkedIn Posts Extractor
+
+Estrae i post recenti dalla pagina attività LinkedIn.
+
+**File**: `linkedin-posts-extractor.user.js`
+
+**Come usare**:
+1. Visita la tua pagina attività LinkedIn
+2. Click sul pulsante "Extract LinkedIn Posts"
+3. Scarica il JSON generato
+4. Importa con: `task import-posts -- ~/Downloads/linkedin-posts-*.json`
+
+**Dati estratti**:
+- Titolo del post (prime 100 caratteri)
+- Excerpt del contenuto (250 caratteri)
+- Data di pubblicazione
+- URL del post
+
+---
+
+## 🎯 Exercism Data Extractor
+
+Script per estrarre badge, statistiche e soluzioni da Exercism.
+
+**File**: `exercism-extractor.user.js`
+
+### Installazione
+
+1. Apri Tampermonkey Dashboard
+2. Click "+" per nuovo script
+3. Copia il contenuto di `exercism-extractor.user.js`
+4. Salva (Ctrl+S)
+
+### Utilizzo
+
+1. **Visita il tuo profilo Exercism**
+   - URL: `https://exercism.org/profiles/YOUR_USERNAME`
+
+2. **Estrai i dati**
+   - Apparirà un pulsante viola: **"📊 Extract Exercism Data"**
+   - Click sul pulsante
+   - Si aprirà un alert con il riepilogo dei dati estratti
+
+3. **File generato**
+   - JSON scaricato automaticamente: `exercism-data-YYYY-MM-DD.json`
+   - JSON copiato negli appunti
+
+### Dati estratti
+
+```json
+{
+  "profile": {
+    "username": "stanzinofree",
+    "location": "Rome, Italy"
+  },
+  "stats": {
+    "reputation": 27,
+    "total_badges": 5,
+    "total_solutions": 27,
+    "total_tracks": 5,
+    "badges_by_rarity": {
+      "common": 4,
+      "rare": 1,
+      "ultimate": 0,
+      "legendary": 0
+    }
+  },
+  "badges": [
+    {
+      "name": "Anybody there?",
+      "rarity": "common",
+      "icon_url": "https://assets.exercism.org/..."
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Go",
+      "exercises_completed": 8,
+      "icon_url": "https://..."
+    }
+  ],
+  "recent_solutions": [
+    {
+      "exercise": "Two Fer",
+      "track": "Go",
+      "status": "published",
+      "published_at": "2024-12-15",
+      "num_stars": 0,
+      "num_comments": 0,
+      "url": "https://exercism.org/tracks/go/exercises/two-fer"
+    }
+  ],
+  "extracted_at": "2026-01-02T15:30:00.000Z"
+}
+```
+
+### Integrazione con update_exercism_from_json.py
+
+```bash
+# 1. Estrai i dati dal browser con Tampermonkey
+# 2. Il file sarà in ~/Downloads/exercism-data-YYYY-MM-DD.json
+# 3. Importa direttamente
+task import-exercism -- ~/Downloads/exercism-data-*.json
+
+# Oppure con Python diretto
+python3 scripts/update_exercism_from_json.py ~/Downloads/exercism-data-2026-01-02.json
+```
+
+### Come funziona
+
+Lo script:
+1. Inserisce un pulsante viola sulla pagina del profilo Exercism
+2. Quando cliccato:
+   - Estrae reputation, badge count, location dal profilo
+   - Chiama l'API pubblica di Exercism (`/api/v2/profiles/{username}/solutions`)
+   - Estrae i badge visibili sulla pagina (con icone e rarità)
+   - Aggrega i dati delle soluzioni per track
+   - Ottiene le 5 soluzioni più recenti
+3. Genera un JSON completo con tutti i dati
+4. Scarica automaticamente il file e lo copia negli appunti
+
+### Troubleshooting
+
+**Non estrae i badge**:
+- Assicurati di essere sulla pagina principale del profilo
+- Per vedere tutti i badge, visita: `https://exercism.org/profiles/YOUR_USERNAME/badges`
+- Ricarica la pagina e riprova
+
+**API non risponde**:
+- Controlla la console (F12) per errori di rete
+- Verifica che il profilo sia pubblico
+- L'API potrebbe essere temporaneamente non disponibile
+
+**Dati mancanti**:
+- Lo script estrae solo dati pubblici
+- Alcuni dati potrebbero non essere visibili senza login
+- Verifica che il profilo sia completo
+
+---
+
 ## Note di sicurezza
 
-- Lo script NON invia dati a server esterni
-- Funziona solo in locale nel tuo browser
-- Non modifica nulla su LinkedIn, è read-only
+- Gli script NON inviano dati a server esterni
+- Funzionano solo in locale nel tuo browser
+- Non modificano nulla sui siti, sono read-only
 - I dati estratti rimangono solo sul tuo computer
+- L'API Exercism è pubblica e accessibile senza autenticazione

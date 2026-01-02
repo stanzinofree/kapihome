@@ -65,18 +65,14 @@ tasks:
       - docker-compose exec frontend /bin/sh
 
   import-stats:
-    desc: Import LinkedIn stats from JSON file
+    desc: Import LinkedIn stats from JSON file (auto-finds in data_tmp/ or pass path)
     cmds:
       - python3 scripts/update_stats_from_json.py {{.CLI_ARGS}}
-      - echo "✅ Stats imported successfully"
-      - echo "Run 'task restart' to apply changes"
 
   import-posts:
-    desc: Import LinkedIn posts from JSON file
+    desc: Import LinkedIn posts from JSON file (auto-finds in data_tmp/ or pass path)
     cmds:
       - python3 scripts/update_posts_from_json.py {{.CLI_ARGS}}
-      - echo "✅ Posts imported successfully"
-      - echo "Run 'task restart' to apply changes"
 
   update-linkedin:
     desc: Complete LinkedIn data update workflow
@@ -85,8 +81,33 @@ tasks:
       - echo "================================"
       - echo "1. Extract stats with Tampermonkey -> linkedin-stats-YYYY-MM-DD.json"
       - echo "2. Extract posts with Tampermonkey -> linkedin-posts-YYYY-MM-DD.json"
-      - echo "3. Run -> task import-stats -- ~/Downloads/linkedin-stats-*.json"
-      - echo "4. Run -> task import-posts -- ~/Downloads/linkedin-posts-*.json"
+      - echo "3. Move JSON files to data_tmp/ directory"
+      - echo "4. Run -> task import-stats"
+      - echo "5. Run -> task import-posts"
+      - echo "6. Run -> task restart"
+      - echo ""
+      - echo "💡 Tip> Files in data_tmp/ are auto-detected (no path needed!)"
+      - echo "   Or pass explicit path> task import-stats -- ~/Downloads/file.json"
+      - echo ""
+      - echo "Tampermonkey scripts> scripts/tampermonkey/"
+
+  import-exercism:
+    desc: Import Exercism data from JSON file (auto-finds in data_tmp/ or pass path)
+    cmds:
+      - python3 scripts/update_exercism_from_json.py {{.CLI_ARGS}}
+
+  update-exercism:
+    desc: Complete Exercism data update workflow
+    cmds:
+      - echo "🎯 Exercism Data Update Workflow"
+      - echo "================================"
+      - echo "1. Visit your Exercism profile -> https://exercism.org/profiles/YOUR_USERNAME"
+      - echo "2. Click 'Extract Exercism Data' button (Tampermonkey)"
+      - echo "3. Move exercism-data-YYYY-MM-DD.json to data_tmp/"
+      - echo "4. Run -> task import-exercism"
       - echo "5. Run -> task restart"
       - echo ""
-      - echo "Tampermonkey scripts located in: scripts/tampermonkey/"
+      - echo "💡 Tip> Files in data_tmp/ are auto-detected (no path needed!)"
+      - echo "   Or pass explicit path> task import-exercism -- ~/Downloads/file.json"
+      - echo ""
+      - echo "Tampermonkey script> scripts/tampermonkey/"

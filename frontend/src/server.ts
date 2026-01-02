@@ -38,6 +38,28 @@ const server = Bun.serve({
       });
     }
     
+    // Serve LinkedIn page
+    if (url.pathname === "/linkedin") {
+      const templateFile = await Bun.file("src/templates/linkedin.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "KapiHome - Zen Capibara" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
+    // Serve Exercism page
+    if (url.pathname === "/exercism") {
+      const templateFile = await Bun.file("src/templates/exercism.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "KapiHome - Zen Capibara" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
     // Serve static files
     if (url.pathname.startsWith("/static/")) {
       const filePath = url.pathname.replace("/static/", "src/static/");

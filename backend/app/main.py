@@ -27,6 +27,70 @@ async def health_check():
         content={"status": "healthy", "service": "kapihome-backend"}
     )
 
+@app.get("/api/linkedin/mini", response_class=HTMLResponse)
+async def get_linkedin_mini():
+    """
+    Returns LinkedIn mini stats (4 metrics only) for homepage
+    """
+    data_path = Path("/app/data/linkedin.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        stats = data.get("stats", {})
+        
+        # Build mini stats HTML - Only 4 cards
+        html = f"""
+        <h2 class="card-source-title gradient-text-linkedin">LinkedIn</h2>
+        <div class="stats-grid-mini">
+            <div class="stat-card-mini">
+                <div class="stat-icon">📊</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('post_impressions_7d', 0)}</span>
+                    <span class="stat-label">Impressions</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">👥</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('followers', 0)}</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('profile_views_90d', 0)}</span>
+                    <span class="stat-label">Views</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">🔍</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('search_appearances_7d', 0)}</span>
+                    <span class="stat-label">Searches</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="/linkedin" class="btn btn-outline">View Details →</a>
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p class='text-muted-foreground'>LinkedIn data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p class='text-muted-foreground'>Error loading LinkedIn data</p>",
+            status_code=500
+        )
+
 @app.get("/api/linkedin", response_class=HTMLResponse)
 async def get_linkedin():
     """
@@ -64,6 +128,7 @@ async def get_linkedin():
         
         # Build HTML response - Only show real data available from LinkedIn dashboard
         html = f"""
+        <h2 class="card-source-title">LinkedIn</h2>
         <div class="linkedin-stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
@@ -135,6 +200,261 @@ async def get_linkedin():
     except Exception as e:
         return HTMLResponse(
             content=f"<p>Error loading LinkedIn data: {str(e)}</p>",
+            status_code=500
+        )
+
+@app.get("/api/exercism/mini", response_class=HTMLResponse)
+async def get_exercism_mini():
+    """
+    Returns Exercism mini stats (4 metrics only) for homepage
+    """
+    data_path = Path("/app/data/exercism.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        stats = data.get("stats", {})
+        badges = data.get("badges", [])
+        tracks = data.get("tracks", [])
+        
+        reputation = stats.get("reputation", 0)
+        total_badges = stats.get("total_badges", len(badges))
+        total_solutions = stats.get("total_solutions", 0)
+        total_tracks = stats.get("total_tracks", len(tracks))
+        
+        # Build mini stats HTML - Only 4 cards
+        html = f"""
+        <h2 class="card-source-title gradient-text-exercism">Exercism</h2>
+        <div class="stats-grid-mini">
+            <div class="stat-card-mini">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-data">
+                    <span class="stat-value">{reputation}</span>
+                    <span class="stat-label">Reputation</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-data">
+                    <span class="stat-value">{total_badges}</span>
+                    <span class="stat-label">Badges</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">✅</div>
+                <div class="stat-data">
+                    <span class="stat-value">{total_solutions}</span>
+                    <span class="stat-label">Solutions</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">💻</div>
+                <div class="stat-data">
+                    <span class="stat-value">{total_tracks}</span>
+                    <span class="stat-label">Tracks</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="/exercism" class="btn btn-outline">View Details →</a>
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p class='text-muted-foreground'>Exercism data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p class='text-muted-foreground'>Error loading Exercism data</p>",
+            status_code=500
+        )
+
+@app.get("/api/exercism", response_class=HTMLResponse)
+async def get_exercism():
+    """
+    Returns Exercism profile data as HTML component for HTMX
+    """
+    data_path = Path("/app/data/exercism.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        profile = data.get("profile", {})
+        stats = data.get("stats", {})
+        badges = data.get("badges", [])
+        tracks = data.get("tracks", [])
+        recent_solutions = data.get("recent_solutions", [])
+        extracted_at = data.get("extracted_at", "")
+        
+        # Parse extracted_at
+        try:
+            updated_dt = datetime.fromisoformat(extracted_at.replace("Z", "+00:00"))
+            updated_str = updated_dt.strftime("%d %b %Y, %H:%M")
+        except:
+            updated_str = "Unknown"
+        
+        # Build stats cards
+        reputation = stats.get("reputation", 0)
+        total_badges = stats.get("total_badges", len(badges))
+        total_solutions = stats.get("total_solutions", 0)
+        total_tracks = stats.get("total_tracks", len(tracks))
+        
+        stats_html = f"""
+        <div class="exercism-stats-grid">
+            <div class="exercism-stat-card">
+                <div class="exercism-stat-icon">⭐</div>
+                <div class="exercism-stat-data">
+                    <span class="exercism-stat-value">{reputation}</span>
+                    <span class="exercism-stat-label">Reputation</span>
+                </div>
+            </div>
+            <div class="exercism-stat-card">
+                <div class="exercism-stat-icon">🏆</div>
+                <div class="exercism-stat-data">
+                    <span class="exercism-stat-value">{total_badges}</span>
+                    <span class="exercism-stat-label">Badges</span>
+                </div>
+            </div>
+            <div class="exercism-stat-card">
+                <div class="exercism-stat-icon">✅</div>
+                <div class="exercism-stat-data">
+                    <span class="exercism-stat-value">{total_solutions}</span>
+                    <span class="exercism-stat-label">Solutions</span>
+                </div>
+            </div>
+            <div class="exercism-stat-card">
+                <div class="exercism-stat-icon">💻</div>
+                <div class="exercism-stat-data">
+                    <span class="exercism-stat-value">{total_tracks}</span>
+                    <span class="exercism-stat-label">Tracks</span>
+                </div>
+            </div>
+        </div>
+        """
+        
+        # Build badges section (show up to 10)
+        badges_html = ""
+        for badge in badges[:10]:
+            badge_name = badge.get("name", "Unknown")
+            badge_rarity = badge.get("rarity", "common")
+            badge_icon = badge.get("icon_url", "")
+            
+            badges_html += f"""
+            <div class="badge-item">
+                <span class="badge-rarity {badge_rarity}"></span>
+                <img src="{badge_icon}" alt="{badge_name}" class="badge-icon" />
+                <span class="badge-name">{badge_name}</span>
+            </div>
+            """
+        
+        badges_section = f"""
+        <div class="exercism-badges-section">
+            <h3 class="section-title">🏆 Badges ({total_badges})</h3>
+            <div class="badges-grid">
+                {badges_html if badges_html else '<p class="no-content">No badges yet</p>'}
+            </div>
+        </div>
+        """ if badges else ""
+        
+        # Build tracks section
+        tracks_html = ""
+        for track in tracks[:6]:  # Show up to 6
+            track_name = track.get("name", "Unknown")
+            track_icon = track.get("icon_url", "")
+            exercises_count = track.get("exercises_completed", 0)
+            
+            tracks_html += f"""
+            <div class="track-item">
+                <img src="{track_icon}" alt="{track_name}" class="track-icon" />
+                <div class="track-info">
+                    <div class="track-name">{track_name}</div>
+                    <div class="track-count">{exercises_count} exercises</div>
+                </div>
+            </div>
+            """
+        
+        tracks_section = f"""
+        <div class="exercism-tracks-section">
+            <h3 class="section-title">💻 Tracks ({total_tracks})</h3>
+            <div class="tracks-grid">
+                {tracks_html if tracks_html else '<p class="no-content">No tracks yet</p>'}
+            </div>
+        </div>
+        """ if tracks else ""
+        
+        # Build solutions section (show up to 5)
+        solutions_html = ""
+        for sol in recent_solutions[:5]:
+            exercise = sol.get("exercise", "Unknown")
+            track = sol.get("track", "Unknown")
+            track_icon = sol.get("track_icon", "")
+            published_at = sol.get("published_at", "")
+            num_stars = sol.get("num_stars", 0)
+            num_comments = sol.get("num_comments", 0)
+            url = sol.get("url", "#")
+            
+            solutions_html += f"""
+            <a href="{url}" target="_blank" class="solution-item">
+                <div class="solution-header">
+                    <img src="{track_icon}" alt="{track}" class="solution-track-icon" />
+                    <span class="solution-title">{exercise}</span>
+                    <span class="solution-track">{track}</span>
+                </div>
+                <div class="solution-meta">
+                    <span class="solution-date">📅 {published_at}</span>
+                    <div class="solution-stats">
+                        <span>⭐ {num_stars}</span>
+                        <span>💬 {num_comments}</span>
+                    </div>
+                </div>
+            </a>
+            """
+        
+        solutions_section = f"""
+        <div class="exercism-solutions-section">
+            <h3 class="section-title">📝 Recent Solutions</h3>
+            <div class="solutions-container">
+                {solutions_html if solutions_html else '<p class="no-content">No solutions yet</p>'}
+            </div>
+        </div>
+        """ if recent_solutions else ""
+        
+        # Build complete HTML
+        username = profile.get("username", "stanzinofree")
+        html = f"""
+        <h2 class="card-source-title">Exercism</h2>
+        {stats_html}
+        {badges_section}
+        {tracks_section}
+        {solutions_section}
+        
+        <div class="exercism-actions">
+            <a href="https://exercism.org/profiles/{username}" target="_blank" class="btn-exercism">
+                View Full Profile →
+            </a>
+        </div>
+        
+        <div class="exercism-last-update">
+            🔄 Last sync: {updated_str}
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p>Exercism data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p>Error loading Exercism data: {str(e)}</p>",
             status_code=500
         )
 

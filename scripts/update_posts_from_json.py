@@ -46,14 +46,41 @@ def save_linkedin_data(data: dict, json_path: Path):
     
     print(f"✅ Saved to: {json_path}")
 
+def find_latest_posts_file() -> str:
+    """Find the latest linkedin-posts-*.json in data_tmp/"""
+    data_tmp = Path(__file__).parent.parent / "data_tmp"
+    if not data_tmp.exists():
+        return None
+    
+    posts_files = list(data_tmp.glob("linkedin-posts-*.json"))
+    if not posts_files:
+        return None
+    
+    # Sort by modification time, most recent first
+    posts_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return str(posts_files[0])
+
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 scripts/update_posts_from_json.py <posts_json_file>")
+    if len(sys.argv) == 1:
+        # No argument: try to find latest file in data_tmp/
+        input_file = find_latest_posts_file()
+        if not input_file:
+            print("❌ No linkedin-posts-*.json file found in data_tmp/")
+            print("\nUsage: python3 scripts/update_posts_from_json.py [<posts_json_file>]")
+            print("\nOptions:")
+            print("  1. Place JSON file in data_tmp/ and run without arguments")
+            print("  2. Provide explicit path:")
+            print("     python3 scripts/update_posts_from_json.py ~/Downloads/linkedin-posts-2026-01-02.json")
+            sys.exit(1)
+        print(f"🔍 Auto-detected: {Path(input_file).name}")
+    elif len(sys.argv) == 2:
+        input_file = sys.argv[1]
+    else:
+        print("Usage: python3 scripts/update_posts_from_json.py [<posts_json_file>]")
         print("\nExample:")
         print("  python3 scripts/update_posts_from_json.py ~/Downloads/linkedin-posts-2026-01-02.json")
+        print("  python3 scripts/update_posts_from_json.py  # Auto-finds latest in data_tmp/")
         sys.exit(1)
-    
-    input_file = sys.argv[1]
     
     print("📝 LinkedIn Posts Importer")
     print("=" * 60)

@@ -1,7 +1,7 @@
 /* Profile Card */
 .profile-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 2rem;
   position: relative;
@@ -19,7 +19,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 
 .profile-avatar {
@@ -29,13 +29,13 @@
   border: 4px solid var(--primary);
   object-fit: cover;
   margin-bottom: 1.5rem;
-  box-shadow: 0 0 30px rgba(10, 255, 157, 0.3);
+  box-shadow: 0 0 30px color-mix(in oklch, var(--primary) 30%, transparent);
 }
 
 .profile-name {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--card-foreground);
   margin-bottom: 0.5rem;
 }
 
@@ -55,7 +55,7 @@
 }
 
 .profile-text {
-  color: var(--text-secondary);
+  color: var(--muted-foreground);
   font-size: 0.9rem;
   line-height: 1.5;
 }
@@ -65,7 +65,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: var(--text-muted);
+  color: var(--muted-foreground);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -75,13 +75,13 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: var(--text-muted);
+  color: var(--muted-foreground);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
 
 .profile-company a {
-  color: var(--secondary);
+  color: var(--accent);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s;
@@ -96,8 +96,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(10, 255, 157, 0.1);
-  border: 1px solid rgba(10, 255, 157, 0.3);
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
   border-radius: 8px;
   font-size: 0.85rem;
   color: var(--primary);

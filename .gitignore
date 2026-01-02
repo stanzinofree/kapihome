@@ -13,6 +13,8 @@ bun.lockb
 .env.local
 data/*.json
 !data/.gitkeep
+data_tmp/
+!data_tmp/README.md
 cache/
 tmp/
 temp/
