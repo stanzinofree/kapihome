@@ -40,6 +40,8 @@ async def get_linkedin():
         
         profile = data.get("profile", {})
         stats = data.get("stats", {})
+        recent_posts = data.get("recent_posts", [])
+        recent_shares = data.get("recent_shares", [])
         last_updated = data.get("last_updated", "")
         
         # Parse last updated
@@ -49,18 +51,30 @@ async def get_linkedin():
         except:
             updated_str = "Unknown"
         
-        # Build HTML response (without name, only job title)
-        html = f"""
-        <div class="linkedin-header">
-            <div class="linkedin-info">
-                <p class="title">{profile.get('title', '')}</p>
+        # Build posts HTML
+        posts_html = ""
+        for post in recent_posts[:2]:
+            posts_html += f"""
+            <div class="linkedin-post">
+                <h4 class="post-title">{post.get('title', '')}</h4>
+                <p class="post-excerpt">{post.get('excerpt', '')}</p>
+                <span class="post-date">📅 {post.get('date', '')}</span>
             </div>
-        </div>
+            """
         
-        <div class="linkedin-bio">
-            {profile.get('headline', '')}
-        </div>
+        # Build shares HTML
+        shares_html = ""
+        for share in recent_shares[:2]:
+            shares_html += f"""
+            <div class="linkedin-share">
+                <p class="share-author">🔄 {share.get('author', '')}</p>
+                <p class="share-title">{share.get('title', '')}</p>
+                <span class="share-date">📅 {share.get('date', '')}</span>
+            </div>
+            """
         
+        # Build HTML response
+        html = f"""
         <div class="linkedin-stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">👁️</div>
@@ -84,8 +98,18 @@ async def get_linkedin():
             </div>
         </div>
         
-        <div class="linkedin-badge">
-            💼 {profile.get('current_company', '')}
+        <div class="linkedin-content-section">
+            <h3 class="section-title">📝 Ultimi Articoli</h3>
+            <div class="posts-container">
+                {posts_html}
+            </div>
+        </div>
+        
+        <div class="linkedin-content-section">
+            <h3 class="section-title">🔄 Condivisioni Recenti</h3>
+            <div class="shares-container">
+                {shares_html}
+            </div>
         </div>
         
         <div class="linkedin-actions">
@@ -133,11 +157,31 @@ async def get_profile():
         
         <h2 class="profile-name">{profile.get('name', 'Alessandro Middei')}</h2>
         
-        <p class="profile-bio">{profile.get('headline', '')}</p>
+        <div class="profile-section">
+            <h4 class="profile-section-title">Job Position</h4>
+            <p class="profile-text">{profile.get('job_position', '')}</p>
+        </div>
+        
+        <div class="profile-section">
+            <h4 class="profile-section-title">Attitudini</h4>
+            <p class="profile-text">{profile.get('attitude', '')}</p>
+        </div>
+        
+        <div class="profile-section">
+            <h4 class="profile-section-title">Bio</h4>
+            <p class="profile-text">{profile.get('headline', '')}</p>
+        </div>
         
         <div class="profile-location">
             <span>📍</span>
             <span>{profile.get('location', '')}</span>
+        </div>
+        
+        <div class="profile-company">
+            <span>💼</span>
+            <a href="{profile.get('current_company_url', '#')}" target="_blank" rel="noopener">
+                {profile.get('current_company', '')}
+            </a>
         </div>
         
         <div class="profile-connections">
