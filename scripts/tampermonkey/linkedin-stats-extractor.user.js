@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         LinkedIn Stats Extractor
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
-// @description  Extract LinkedIn dashboard stats and export as JSON
+// @version      1.1.0
+// @description  Extract LinkedIn dashboard stats and export as JSON (with debug mode)
 // @author       Alessandro Middei
 // @match        https://www.linkedin.com/dashboard/
 // @match        https://www.linkedin.com/dashboard/*
@@ -64,59 +64,82 @@
             engagement_rate: 0.0
         };
 
+        const debugInfo = [];
+
         try {
-            const viewsCards = document.querySelectorAll("[class*=dashboard-stats], [class*=stat-card], .analytics-card");
-            
-            viewsCards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                
-                if (text.includes("profile view") || text.includes("who viewed")) {
-                    const numbers = card.querySelectorAll("[class*=number], [class*=stat-value], strong, h3, h4");
-                    numbers.forEach((numEl, idx) => {
-                        const val = extractNumber(numEl.textContent);
-                        if (val > 0) {
-                            if (idx === 0) stats.profile_views_7d = val;
-                            else if (idx === 1) stats.profile_views_30d = val;
-                            else if (idx === 2) stats.profile_views_90d = val;
-                        }
-                    });
+            // Strategy 1: Try all possible selectors
+            const selectors = [
+                "*[class*='dashboard']",
+                "*[class*='analytics']",
+                "*[class*='stat']",
+                "*[class*='metric']",
+                "section",
+                "article",
+                ".pvs-list",
+                "li"
+            ];
+
+            const allElements = new Set();
+            selectors.forEach(sel => {
+                document.querySelectorAll(sel).forEach(el => allElements.add(el));
+            });
+
+            debugInfo.push(`Found ${allElements.size} potential elements`);
+
+            // Scan all elements for numbers
+            allElements.forEach(el => {
+                const text = el.textContent.toLowerCase();
+                const directText = Array.from(el.childNodes)
+                    .filter(n => n.nodeType === 3)
+                    .map(n => n.textContent.trim())
+                    .join(" ");
+
+                // Profile views detection
+                if (text.match(/profil.*view|chi.*visualizz|who.*view/i)) {
+                    debugInfo.push(`Profile views card found: ${text.substring(0, 100)}`);
+                    const numbers = extractAllNumbers(el);
+                    debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
+                    if (numbers.length >= 1) stats.profile_views_7d = numbers[0];
+                    if (numbers.length >= 2) stats.profile_views_30d = numbers[1];
+                    if (numbers.length >= 3) stats.profile_views_90d = numbers[2];
                 }
 
-                if (text.includes("post impression") || text.includes("impressions")) {
-                    const numbers = card.querySelectorAll("[class*=number], [class*=stat-value], strong, h3, h4");
-                    numbers.forEach((numEl, idx) => {
-                        const val = extractNumber(numEl.textContent);
-                        if (val > 0) {
-                            if (idx === 0) stats.post_impressions_7d = val;
-                            else if (idx === 1) stats.post_impressions_30d = val;
-                        }
-                    });
+                // Post impressions
+                if (text.match(/impression|visualizzazioni.*post/i)) {
+                    debugInfo.push(`Post impressions card found: ${text.substring(0, 100)}`);
+                    const numbers = extractAllNumbers(el);
+                    debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
+                    if (numbers.length >= 1) stats.post_impressions_7d = Math.max(stats.post_impressions_7d, numbers[0]);
+                    if (numbers.length >= 2) stats.post_impressions_30d = Math.max(stats.post_impressions_30d, numbers[1]);
                 }
 
-                if (text.includes("search appear") || text.includes("searches")) {
-                    const numbers = card.querySelectorAll("[class*=number], [class*=stat-value], strong, h3, h4");
-                    numbers.forEach((numEl, idx) => {
-                        const val = extractNumber(numEl.textContent);
-                        if (val > 0) {
-                            if (idx === 0) stats.search_appearances_7d = val;
-                            else if (idx === 1) stats.search_appearances_30d = val;
-                        }
-                    });
+                // Search appearances
+                if (text.match(/search.*appear|ricerche.*compar/i)) {
+                    debugInfo.push(`Search appearances found: ${text.substring(0, 100)}`);
+                    const numbers = extractAllNumbers(el);
+                    debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
+                    if (numbers.length >= 1) stats.search_appearances_7d = Math.max(stats.search_appearances_7d, numbers[0]);
+                    if (numbers.length >= 2) stats.search_appearances_30d = Math.max(stats.search_appearances_30d, numbers[1]);
                 }
 
-                if (text.includes("follower")) {
-                    const numbers = card.querySelectorAll("[class*=number], [class*=stat-value], strong, h3, h4");
-                    const val = extractNumber(numbers[0]?.textContent);
-                    if (val > 0) stats.followers = val;
+                // Followers
+                if (text.match(/follower|seguaci/i) && !text.match(/connection/i)) {
+                    debugInfo.push(`Followers found: ${text.substring(0, 100)}`);
+                    const numbers = extractAllNumbers(el);
+                    debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
+                    if (numbers.length >= 1) stats.followers = Math.max(stats.followers, numbers[0]);
                 }
 
-                if (text.includes("connection") && (text.includes("new") || text.includes("growth"))) {
-                    const numbers = card.querySelectorAll("[class*=number], [class*=stat-value], strong, h3, h4");
-                    const val = extractNumber(numbers[0]?.textContent);
-                    if (val > 0) stats.connection_growth_7d = val;
+                // Connections growth
+                if (text.match(/(new.*connection|nuov.*conness)/i)) {
+                    debugInfo.push(`Connection growth found: ${text.substring(0, 100)}`);
+                    const numbers = extractAllNumbers(el);
+                    debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
+                    if (numbers.length >= 1) stats.connection_growth_7d = Math.max(stats.connection_growth_7d, numbers[0]);
                 }
             });
 
+            // Calculate engagement rate
             if (stats.followers > 0 && stats.post_impressions_7d > 0) {
                 stats.engagement_rate = parseFloat(((stats.post_impressions_7d / stats.followers) * 100).toFixed(2));
             }
@@ -124,20 +147,41 @@
             const output = {
                 stats: stats,
                 extracted_at: new Date().toISOString(),
-                note: "Extracted from LinkedIn Dashboard"
+                note: "Extracted from LinkedIn Dashboard",
+                debug: debugInfo
             };
 
             const jsonOutput = JSON.stringify(output, null, 2);
-            showResultModal(jsonOutput, stats);
+            showResultModal(jsonOutput, stats, debugInfo);
             console.log("✅ Extraction complete:", output);
 
         } catch (error) {
             console.error("❌ Extraction error:", error);
-            alert("Error extracting stats. Check console for details.");
+            alert("Error extracting stats. Check console for details.\n\n" + error.message);
         }
     };
 
-    const showResultModal = (json, stats) => {
+    const extractAllNumbers = (element) => {
+        const numbers = [];
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+
+        let node;
+        while (node = walker.nextNode()) {
+            const val = extractNumber(node.textContent);
+            if (val > 0 && !numbers.includes(val)) {
+                numbers.push(val);
+            }
+        }
+
+        return numbers;
+    };
+
+    const showResultModal = (json, stats, debugInfo = []) => {
         const existing = document.getElementById("stats-extractor-modal");
         if (existing) existing.remove();
 
@@ -153,7 +197,7 @@
         const content = document.createElement("div");
         content.style.cssText = `
             background: #1a1a1a; border: 2px solid #0aff9d;
-            border-radius: 12px; padding: 30px; max-width: 700px;
+            border-radius: 12px; padding: 30px; max-width: 800px;
             max-height: 80vh; overflow-y: auto;
             box-shadow: 0 0 40px rgba(10, 255, 157, 0.4); color: #ffffff;
         `;
@@ -175,7 +219,22 @@
                     <li>Engagement Rate: <strong>${stats.engagement_rate}%</strong></li>
                 </ul>
             </div>
-            ` : '<p style="color: orange;">⚠️ No stats found. Make sure you are on the dashboard page.</p>'}
+            ` : `
+            <div style="margin-bottom: 20px; background: rgba(255, 165, 0, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid orange;">
+                <p style="color: orange; margin: 0;">⚠️ No stats found. LinkedIn layout may have changed.</p>
+                <p style="color: #aaa; margin-top: 10px; font-size: 12px;">Check debug info below or open browser console (F12) for details.</p>
+            </div>
+            `}
+            ${debugInfo.length > 0 ? `
+            <details style="margin-bottom: 15px;">
+                <summary style="color: #00d4ff; cursor: pointer; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 6px;">
+                    🔍 Debug Info (${debugInfo.length} entries)
+                </summary>
+                <div style="margin-top: 10px; padding: 10px; background: #0f0f0f; border-radius: 6px; max-height: 200px; overflow-y: auto;">
+                    ${debugInfo.map(info => `<div style="font-size: 11px; color: #888; margin-bottom: 5px; font-family: monospace;">${info}</div>`).join('')}
+                </div>
+            </details>
+            ` : ''}
             <h3 style="color: #00d4ff; margin-bottom: 10px;">JSON Output:</h3>
             <textarea id="stats-json-output" readonly style="
                 width: 100%; height: 250px; background: #0f0f0f;
