@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         LinkedIn Posts Extractor
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
-// @description  Extract recent posts from LinkedIn profile
+// @version      1.1.0
+// @description  Extract recent posts from LinkedIn profile (fixed selectors)
 // @author       Alessandro Middei
 // @match        https://www.linkedin.com/in/*/recent-activity/all/
 // @match        https://www.linkedin.com/in/stanzinofree/recent-activity/all/
@@ -27,8 +27,8 @@
         try {
             const posts = [];
             
-            // Find all post containers
-            const postElements = document.querySelectorAll('.profile-creator-shared-feed-update__container');
+            // Find all post containers - use the feed-shared-update-v2 class
+            const postElements = document.querySelectorAll('.feed-shared-update-v2');
             
             console.log("Found " + postElements.length + " post elements");
 
@@ -36,46 +36,57 @@
                 if (index >= 5) return; // Limit to 5 posts
 
                 try {
-                    // Extract post text/title
-                    const textEl = postEl.querySelector('.feed-shared-update-v2__description, .feed-shared-text__text-view');
+                    // Extract post text from update-components-text
+                    const textEl = postEl.querySelector('.update-components-text');
                     let title = "";
                     let excerpt = "";
                     
                     if (textEl) {
                         const fullText = textEl.textContent.trim();
-                        // First line or first 80 chars as title
-                        const lines = fullText.split('\n').filter(l => l.trim());
-                        title = lines[0] ? lines[0].substring(0, 100) : "";
-                        excerpt = fullText.substring(0, 200);
+                        // Clean up whitespace
+                        const cleaned = fullText.replace(/\s+/g, ' ').trim();
+                        // First sentence or first 100 chars as title
+                        const sentences = cleaned.split(/[.!?]\s+/);
+                        title = sentences[0] ? sentences[0].substring(0, 100) : cleaned.substring(0, 100);
+                        excerpt = cleaned.substring(0, 250);
                     }
 
-                    // Extract timestamp
-                    const timeEl = postEl.querySelector('.feed-shared-actor__sub-description time, .update-components-actor__sub-description time');
-                    let date = "";
-                    if (timeEl) {
-                        const datetime = timeEl.getAttribute('datetime');
-                        if (datetime) {
-                            date = datetime.split('T')[0]; // Get YYYY-MM-DD
+                    // Extract URN from data-urn attribute to build URL
+                    const urn = postEl.getAttribute('data-urn');
+                    let url = "";
+                    if (urn) {
+                        // Extract activity ID from urn:li:activity:7411868109092896770
+                        const activityId = urn.split(':').pop();
+                        url = "https://www.linkedin.com/feed/update/" + urn + "/";
+                    }
+
+                    // Extract date - try to find relative time text
+                    const timeText = postEl.querySelector('.update-components-actor__sub-description');
+                    let date = new Date().toISOString().split('T')[0];
+                    if (timeText) {
+                        const text = timeText.textContent.toLowerCase();
+                        // Parse relative dates like "2 giorni" or "1 settimana"
+                        if (text.includes('giorn') || text.includes('day')) {
+                            const match = text.match(/(\d+)/);
+                            if (match) {
+                                const daysAgo = parseInt(match[1]);
+                                const d = new Date();
+                                d.setDate(d.getDate() - daysAgo);
+                                date = d.toISOString().split('T')[0];
+                            }
                         }
                     }
 
-                    // Extract post URL
-                    const linkEl = postEl.querySelector('a[href*="/posts/"]');
-                    let url = "";
-                    if (linkEl) {
-                        url = linkEl.href.split('?')[0]; // Remove query params
-                    }
-
-                    // Only add if we have minimum data
-                    if (title || excerpt) {
+                    // Only add if we have text
+                    if (title && excerpt) {
                         posts.push({
-                            title: title || excerpt.substring(0, 80) + "...",
-                            excerpt: excerpt || title,
-                            date: date || new Date().toISOString().split('T')[0],
+                            title: title,
+                            excerpt: excerpt,
+                            date: date,
                             url: url || "https://www.linkedin.com/in/stanzinofree/recent-activity/"
                         });
                         
-                        console.log("Extracted post " + (index + 1) + ":", {title, date, url});
+                        console.log("Extracted post " + (index + 1) + ":", {title: title.substring(0, 50) + "...", date, url});
                     }
                 } catch (err) {
                     console.error("Error extracting post " + index + ":", err);
