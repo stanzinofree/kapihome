@@ -4,21 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
     <div class="container">
         <header class="hero">
-            <h1>🦫 KapiHome</h1>
-            <p class="subtitle">Zen Capibara Personal Space</p>
+            <span class="tag">Zen Digital Garden</span>
+            <h1><span class="emoji">🦫</span> KapiHome</h1>
+            <p class="subtitle">A calm space for aggregating my digital presence through elegant microcards.</p>
         </header>
         
         <main class="content">
             <div class="microcard-grid" id="microcard-container">
                 <div class="microcard">
-                    <h3>Welcome</h3>
-                    <p>Building my digital zen garden, one microcard at a time.</p>
+                    <h3>✨ Welcome</h3>
+                    <p>Building my digital zen garden, one microcard at a time. This space aggregates my learning journey, projects, and activities in a calm, professional way.</p>
+                </div>
+                
+                <div class="microcard">
+                    <h3>🎯 Philosophy</h3>
+                    <p>Not a CV, not a resume. Just snapshots of interests, progress, and creativity. Clean design meets playful accents.</p>
+                </div>
+                
+                <div class="microcard">
+                    <h3>🚀 In Progress</h3>
+                    <p>Currently building the infrastructure for dynamic microcards powered by HTMX and FastAPI. Stay tuned for live data from LinkedIn, Exercism, and more.</p>
                 </div>
             </div>
         </main>
