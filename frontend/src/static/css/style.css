@@ -243,3 +243,39 @@ nav a:hover {
     padding: 0.3rem 0.8rem;
   }
 }
+
+/* Layout with featured card */
+.content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.featured-card {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.microcard-grid {
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0;
+}
+
+/* Responsive layout adjustment */
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+  
+  .featured-card {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .microcard-grid {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}

@@ -8,17 +8,58 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+    <link rel="stylesheet" href="/static/css/linkedin-card.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="/" class="logo">
+                <span class="emoji">🦫</span>
+                <span>KapiHome</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/projects">Projects</a></li>
+                <li><a href="/learning">Learning</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+            
+            <div class="nav-external">
+                <a href="https://cv.middei.info" target="_blank" rel="noopener">
+                    📄 CV
+                </a>
+                <a href="https://www.linkedin.com/in/stanzinofree/" target="_blank" rel="noopener">
+                    💼 LinkedIn
+                </a>
+            </div>
+            
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">☰</button>
+        </nav>
+    </header>
+
     <div class="container">
         <header class="hero">
             <span class="tag">Zen Digital Garden</span>
-            <h1><span class="emoji">🦫</span> KapiHome</h1>
+            <h1><span class="emoji">🦫</span> Welcome</h1>
             <p class="subtitle">A calm space for aggregating my digital presence through elegant microcards.</p>
         </header>
         
         <main class="content">
+            <!-- LinkedIn Featured Card -->
+            <div class="featured-card" hx-get="/api/linkedin" hx-trigger="load" hx-swap="innerHTML">
+                <div class="linkedin-header">
+                    <div class="linkedin-avatar" style="width: 80px; height: 80px; background: var(--bg-card-hover); border-radius: 50%;"></div>
+                    <div class="linkedin-info">
+                        <h3>Loading...</h3>
+                        <p class="title">Fetching LinkedIn profile...</p>
+                    </div>
+                </div>
+            </div>
+            
             <div class="microcard-grid" id="microcard-container">
                 <div class="microcard">
                     <h3>✨ Welcome</h3>
