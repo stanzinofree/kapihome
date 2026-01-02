@@ -73,29 +73,9 @@ async def get_linkedin():
             </div>
             """
         
-        # Build HTML response
+        # Build HTML response - Only show real data available from LinkedIn dashboard
         html = f"""
         <div class="linkedin-stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">👁️</div>
-                <div class="stat-data">
-                    <span class="stat-value">{stats.get('profile_views_7d', 0)}</span>
-                    <span class="stat-label">Profile Views (7d)</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" style="width: {min(stats.get('profile_views_7d', 0) / 200 * 100, 100)}%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📈</div>
-                <div class="stat-data">
-                    <span class="stat-value">{stats.get('profile_views_30d', 0)}</span>
-                    <span class="stat-label">Profile Views (30d)</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" style="width: {min(stats.get('profile_views_30d', 0) / 800 * 100, 100)}%;"></div>
-                    </div>
-                </div>
-            </div>
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-data">
@@ -107,12 +87,22 @@ async def get_linkedin():
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📉</div>
+                <div class="stat-icon">👥</div>
                 <div class="stat-data">
-                    <span class="stat-value">{stats.get('post_impressions_30d', 0)}</span>
-                    <span class="stat-label">Post Impressions (30d)</span>
+                    <span class="stat-value">{stats.get('followers', 0)}</span>
+                    <span class="stat-label">Followers</span>
                     <div class="stat-bar">
-                        <div class="stat-fill" style="width: {min(stats.get('post_impressions_30d', 0) / 5000 * 100, 100)}%;"></div>
+                        <div class="stat-fill" style="width: {min(stats.get('followers', 0) / 700 * 100, 100)}%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('profile_views_90d', 0)}</span>
+                    <span class="stat-label">Profile Views (90d)</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: {min(stats.get('profile_views_90d', 0) / 200 * 100, 100)}%;"></div>
                     </div>
                 </div>
             </div>
@@ -123,36 +113,6 @@ async def get_linkedin():
                     <span class="stat-label">Search Appearances (7d)</span>
                     <div class="stat-bar">
                         <div class="stat-fill" style="width: {min(stats.get('search_appearances_7d', 0) / 20 * 100, 100)}%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-data">
-                    <span class="stat-value">{stats.get('followers', 0)}</span>
-                    <span class="stat-label">Followers</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" style="width: {min(stats.get('followers', 0) / 600 * 100, 100)}%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📲</div>
-                <div class="stat-data">
-                    <span class="stat-value">+{stats.get('connection_growth_7d', 0)}</span>
-                    <span class="stat-label">New Connections (7d)</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" style="width: {min(stats.get('connection_growth_7d', 0) / 20 * 100, 100)}%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💬</div>
-                <div class="stat-data">
-                    <span class="stat-value">{stats.get('engagement_rate', 0)}%</span>
-                    <span class="stat-label">Engagement Rate</span>
-                    <div class="stat-bar">
-                        <div class="stat-fill" style="width: {min(stats.get('engagement_rate', 0) * 10, 100)}%;"></div>
                     </div>
                 </div>
             </div>
