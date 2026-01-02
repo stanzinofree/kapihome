@@ -32,16 +32,16 @@
 
         try {
             const cards = document.querySelectorAll(".pcd-analytics-view-item");
-            
+
             cards.forEach(card => {
                 const mainNum = card.querySelector(".text-body-large-bold");
                 const label = card.querySelector(".text-body-small");
-                
+
                 if (!mainNum || !label) return;
-                
+
                 const value = parseFloat(mainNum.textContent.replace(/\./g, "").replace(",", "."));
                 const labelText = label.textContent.toLowerCase();
-                
+
                 if (labelText.includes("impression")) {
                     stats.post_impressions_7d = value;
                 } else if (labelText.includes("follower")) {
@@ -64,7 +64,7 @@
             };
 
             const json = JSON.stringify(output, null, 2);
-            
+
             // Log to console
             console.log("LinkedIn Stats:", json);
 
@@ -77,7 +77,7 @@
             }
 
             // Download
-            const blob = new Blob([json], {type: "application/json"});
+
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;

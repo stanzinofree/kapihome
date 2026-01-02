@@ -41,7 +41,6 @@ async def get_linkedin():
         profile = data.get("profile", {})
         stats = data.get("stats", {})
         recent_posts = data.get("recent_posts", [])
-        recent_shares = data.get("recent_shares", [])
         last_updated = data.get("last_updated", "")
         
         # Parse last updated
@@ -51,26 +50,16 @@ async def get_linkedin():
         except:
             updated_str = "Unknown"
         
-        # Build posts HTML
+        # Build posts HTML (show up to 5 posts)
         posts_html = ""
-        for post in recent_posts[:2]:
+        for post in recent_posts[:5]:
+            post_url = post.get('url', '#')
             posts_html += f"""
-            <div class="linkedin-post">
+            <a href="{post_url}" target="_blank" class="linkedin-post">
                 <h4 class="post-title">{post.get('title', '')}</h4>
                 <p class="post-excerpt">{post.get('excerpt', '')}</p>
                 <span class="post-date">📅 {post.get('date', '')}</span>
-            </div>
-            """
-        
-        # Build shares HTML
-        shares_html = ""
-        for share in recent_shares[:2]:
-            shares_html += f"""
-            <div class="linkedin-share">
-                <p class="share-author">🔄 {share.get('author', '')}</p>
-                <p class="share-title">{share.get('title', '')}</p>
-                <span class="share-date">📅 {share.get('date', '')}</span>
-            </div>
+            </a>
             """
         
         # Build HTML response - Only show real data available from LinkedIn dashboard
@@ -119,16 +108,9 @@ async def get_linkedin():
         </div>
         
         <div class="linkedin-content-section">
-            <h3 class="section-title">📝 Ultimi Articoli</h3>
+            <h3 class="section-title">📝 Ultimi Post</h3>
             <div class="posts-container">
-                {posts_html}
-            </div>
-        </div>
-        
-        <div class="linkedin-content-section">
-            <h3 class="section-title">🔄 Condivisioni Recenti</h3>
-            <div class="shares-container">
-                {shares_html}
+                {posts_html if posts_html else '<p class="no-content">Nessun post recente disponibile</p>'}
             </div>
         </div>
         

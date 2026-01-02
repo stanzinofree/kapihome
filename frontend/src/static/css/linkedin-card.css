@@ -219,16 +219,28 @@
 
 /* LinkedIn Posts */
 .linkedin-post {
+  display: block;
   padding: 1rem;
   background: rgba(0, 119, 181, 0.05);
   border-left: 3px solid #0077b5;
   border-radius: 8px;
   transition: all 0.3s;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .linkedin-post:hover {
   background: rgba(0, 119, 181, 0.1);
   transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 119, 181, 0.2);
+}
+
+.no-content {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 2rem;
 }
 
 .post-title {
