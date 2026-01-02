@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         LinkedIn Stats Extractor
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
-// @description  Extract LinkedIn dashboard stats with manual edit capability
+// @version      1.3.0
+// @description  Extract LinkedIn dashboard stats with smart estimation for missing data
 // @author       Alessandro Middei
 // @match        https://www.linkedin.com/dashboard/
 // @match        https://www.linkedin.com/dashboard/*
@@ -94,48 +94,57 @@
                     .map(n => n.textContent.trim())
                     .join(" ");
 
-                // Profile views detection
-                if (text.match(/profil.*view|chi.*visualizz|who.*view|visualizzazioni.*profil|hanno.*visitato/i)) {
-                    debugInfo.push(`Profile views card found: ${text.substring(0, 100)}`);
+                // Profile views detection (LinkedIn shows only 90 days)
+                if (text.match(/visitatori.*profil/i) && text.match(/ultimi.*90/i)) {
+                    debugInfo.push(`Profile views (90d) found: ${text.substring(0, 100)}`);
                     const numbers = extractAllNumbers(el);
                     debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
-                    if (numbers.length >= 1) stats.profile_views_7d = Math.max(stats.profile_views_7d, numbers[0]);
-                    if (numbers.length >= 2) stats.profile_views_30d = Math.max(stats.profile_views_30d, numbers[1]);
-                    if (numbers.length >= 3) stats.profile_views_90d = Math.max(stats.profile_views_90d, numbers[2]);
+                    if (numbers.length >= 1) {
+                        stats.profile_views_90d = Math.max(stats.profile_views_90d, numbers[0]);
+                        // Estimate 7d and 30d from 90d (roughly 1/13 and 1/3)
+                        if (stats.profile_views_7d === 0) stats.profile_views_7d = Math.round(numbers[0] / 13);
+                        if (stats.profile_views_30d === 0) stats.profile_views_30d = Math.round(numbers[0] / 3);
+                    }
                 }
 
-                // Post impressions
-                if (text.match(/impression|visualizzazioni.*post/i)) {
-                    debugInfo.push(`Post impressions card found: ${text.substring(0, 100)}`);
+                // Post impressions (LinkedIn shows 7 days data)
+                if (text.match(/impression.*post/i) && text.match(/ultimi.*7/i)) {
+                    debugInfo.push(`Post impressions (7d) found: ${text.substring(0, 100)}`);
                     const numbers = extractAllNumbers(el);
                     debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
-                    if (numbers.length >= 1) stats.post_impressions_7d = Math.max(stats.post_impressions_7d, numbers[0]);
-                    if (numbers.length >= 2) stats.post_impressions_30d = Math.max(stats.post_impressions_30d, numbers[1]);
+                    if (numbers.length >= 1) {
+                        stats.post_impressions_7d = Math.max(stats.post_impressions_7d, numbers[0]);
+                        // Estimate 30d from 7d (roughly 4x)
+                        if (stats.post_impressions_30d === 0) stats.post_impressions_30d = Math.round(numbers[0] * 4);
+                    }
                 }
 
-                // Search appearances
-                if (text.match(/search.*appear|ricerche.*compar/i)) {
-                    debugInfo.push(`Search appearances found: ${text.substring(0, 100)}`);
+                // Search appearances (LinkedIn shows only 7 days as "Settimana precedente")
+                if (text.match(/comparse.*ricerche/i) && text.match(/settimana.*precedente/i)) {
+                    debugInfo.push(`Search appearances (7d) found: ${text.substring(0, 100)}`);
                     const numbers = extractAllNumbers(el);
                     debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
-                    if (numbers.length >= 1) stats.search_appearances_7d = Math.max(stats.search_appearances_7d, numbers[0]);
-                    if (numbers.length >= 2) stats.search_appearances_30d = Math.max(stats.search_appearances_30d, numbers[1]);
+                    if (numbers.length >= 1) {
+                        stats.search_appearances_7d = Math.max(stats.search_appearances_7d, numbers[0]);
+                        // Estimate 30d from 7d (roughly 4x)
+                        if (stats.search_appearances_30d === 0) stats.search_appearances_30d = Math.round(numbers[0] * 4);
+                    }
                 }
 
-                // Followers
-                if (text.match(/follower|seguaci/i) && !text.match(/connection/i)) {
+                // Followers (shows total count and 7d growth percentage)
+                if (text.match(/^\s*follower\s*$/i) || (text.match(/follower/i) && text.match(/ultimi.*7/i))) {
                     debugInfo.push(`Followers found: ${text.substring(0, 100)}`);
                     const numbers = extractAllNumbers(el);
                     debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
-                    if (numbers.length >= 1) stats.followers = Math.max(stats.followers, numbers[0]);
-                }
-
-                // Connections growth
-                if (text.match(/(new.*connection|nuov.*conness)/i)) {
-                    debugInfo.push(`Connection growth found: ${text.substring(0, 100)}`);
-                    const numbers = extractAllNumbers(el);
-                    debugInfo.push(`  Numbers found: ${JSON.stringify(numbers)}`);
-                    if (numbers.length >= 1) stats.connection_growth_7d = Math.max(stats.connection_growth_7d, numbers[0]);
+                    if (numbers.length >= 1) {
+                        stats.followers = Math.max(stats.followers, numbers[0]);
+                        // Extract growth percentage if available (e.g., "0,7%")
+                        const growthMatch = text.match(/([\d,\.]+)%/);
+                        if (growthMatch && stats.connection_growth_7d === 0) {
+                            const growthPct = parseFloat(growthMatch[1].replace(',', '.'));
+                            stats.connection_growth_7d = Math.round(stats.followers * (growthPct / 100));
+                        }
+                    }
                 }
             });
 
@@ -147,7 +156,7 @@
             const output = {
                 stats: stats,
                 extracted_at: new Date().toISOString(),
-                note: "Extracted from LinkedIn Dashboard",
+                note: "Extracted from LinkedIn Dashboard. Note: LinkedIn only shows 90d for profile views and 7d for search appearances. Missing values are estimated.",
                 debug: debugInfo
             };
 
