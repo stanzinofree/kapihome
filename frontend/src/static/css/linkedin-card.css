@@ -1,15 +1,14 @@
 /* LinkedIn Featured Card */
-.featured-card {
+.linkedin-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 2rem;
   position: relative;
   overflow: hidden;
-  grid-column: span 1;
 }
 
-.featured-card::before {
+.linkedin-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -21,31 +20,17 @@
 
 .linkedin-header {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
-.linkedin-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 3px solid var(--border-subtle);
-  object-fit: cover;
-}
-
-.linkedin-info h3 {
-  font-size: 1.3rem;
-  margin-bottom: 0.3rem;
+.linkedin-info .title {
+  font-size: 1.2rem;
   color: var(--text-primary);
   font-weight: 600;
-}
-
-.linkedin-info .title {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.3rem;
   line-height: 1.4;
+  margin-bottom: 0.5rem;
 }
 
 .linkedin-info .location {
@@ -59,7 +44,7 @@
 .linkedin-bio {
   margin-bottom: 1.5rem;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 

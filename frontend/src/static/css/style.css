@@ -244,22 +244,27 @@ nav a:hover {
   }
 }
 
-/* Layout with featured card */
+/* Layout with featured cards */
 .content {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 2fr 1fr;
   gap: 2rem;
   align-items: start;
 }
 
-.featured-card {
+.linkedin-card {
   grid-column: 1;
   grid-row: 1;
 }
 
-.microcard-grid {
+.profile-card {
   grid-column: 2;
   grid-row: 1;
+}
+
+.microcard-grid {
+  grid-column: 1 / -1;
+  grid-row: 2;
   margin-top: 0;
 }
 
@@ -269,13 +274,18 @@ nav a:hover {
     grid-template-columns: 1fr;
   }
   
-  .featured-card {
+  .linkedin-card {
     grid-column: 1;
     grid-row: 1;
   }
   
-  .microcard-grid {
+  .profile-card {
     grid-column: 1;
     grid-row: 2;
+  }
+  
+  .microcard-grid {
+    grid-column: 1;
+    grid-row: 3;
   }
 }

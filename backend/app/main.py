@@ -49,16 +49,11 @@ async def get_linkedin():
         except:
             updated_str = "Unknown"
         
-        # Build HTML response
-        avatar_url = profile.get('avatar_url', '')
-        
+        # Build HTML response (without name, only job title)
         html = f"""
         <div class="linkedin-header">
-            <img src="{avatar_url}" alt="{profile.get('name', '')}" class="linkedin-avatar" onerror="this.style.display='none'" crossorigin="anonymous" />
             <div class="linkedin-info">
-                <h3>{profile.get('name', 'Alessandro Middei')}</h3>
                 <p class="title">{profile.get('title', '')}</p>
-                <p class="location">📍 {profile.get('location', '')}</p>
             </div>
         </div>
         
@@ -114,5 +109,52 @@ async def get_linkedin():
     except Exception as e:
         return HTMLResponse(
             content=f"<p>Error loading LinkedIn data: {str(e)}</p>",
+            status_code=500
+        )
+
+@app.get("/api/profile", response_class=HTMLResponse)
+async def get_profile():
+    """
+    Returns profile card with photo and bio data as HTML component for HTMX
+    """
+    data_path = Path("/app/data/linkedin.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        profile = data.get("profile", {})
+        
+        # Build profile card HTML
+        html = f"""
+        <img src="{profile.get('avatar_url', '/static/images/avatar.jpg')}" 
+             alt="{profile.get('name', 'Alessandro Middei')}" 
+             class="profile-avatar" />
+        
+        <h2 class="profile-name">{profile.get('name', 'Alessandro Middei')}</h2>
+        
+        <p class="profile-bio">{profile.get('headline', '')}</p>
+        
+        <div class="profile-location">
+            <span>📍</span>
+            <span>{profile.get('location', '')}</span>
+        </div>
+        
+        <div class="profile-connections">
+            <span>🤝</span>
+            <span>{profile.get('connections', '500+')} connections</span>
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p>Profile data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p>Error loading profile data: {str(e)}</p>",
             status_code=500
         )
