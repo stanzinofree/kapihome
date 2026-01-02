@@ -49,8 +49,8 @@
 }
 
 .linkedin-stats-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding-top: 1rem;
@@ -286,6 +286,10 @@
 
 /* Responsive adjustments for posts/shares */
 @media (max-width: 768px) {
+  .linkedin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .linkedin-post,
   .linkedin-share {
     padding: 0.8rem;
