@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         LinkedIn Stats Extractor (Minimal)
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
-// @description  Extract only actual LinkedIn dashboard stats (no estimates)
+// @version      1.5.0
+// @description  Simple extractor with auto-download and clipboard copy
 // @author       Alessandro Middei
 // @match        https://www.linkedin.com/dashboard/
 // @match        https://www.linkedin.com/dashboard/*
@@ -88,66 +88,45 @@
     };
 
     const showResultModal = (json, stats) => {
-        const existing = document.getElementById("stats-modal");
-        if (existing) existing.remove();
+        // Summary
+        const summary = `📊 LinkedIn Stats Extracted!\n\n` +
+            `Post Impressions (7d): ${stats.post_impressions_7d}\n` +
+            `Followers: ${stats.followers} (+${stats.follower_growth_pct}%)\n` +
+            `Profile Views (90d): ${stats.profile_views_90d}\n` +
+            `Search Appearances (7d): ${stats.search_appearances_7d}\n\n` +
+            `JSON is in console and will be downloaded.`;
 
-        const modal = document.createElement("div");
-        modal.id = "stats-modal";
-        modal.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); z-index: 10000;
-            display: flex; align-items: center; justify-content: center;
-        `;
+        // Show summary
+        alert(summary);
 
-        const content = document.createElement("div");
-        content.style.cssText = `
-            background: #1a1a1a; border: 2px solid #0aff9d;
-            border-radius: 12px; padding: 30px; max-width: 600px;
-            color: #ffffff;
-        `;
+        // Log to console
+        console.log("📊 LinkedIn Stats JSON:");
+        console.log(json);
 
-        content.innerHTML = `
-            <h2 style="color: #0aff9d; margin-bottom: 20px;">📊 LinkedIn Stats</h2>
-            <div style="margin-bottom: 20px; background: rgba(10, 255, 157, 0.1); padding: 15px; border-radius: 8px;">
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    <li>Post Impressions (7d): <strong>${stats.post_impressions_7d}</strong></li>
-                    <li>Followers: <strong>${stats.followers}</strong> (+${stats.follower_growth_pct}%)</li>
-                    <li>Profile Views (90d): <strong>${stats.profile_views_90d}</strong></li>
-                    <li>Search Appearances (7d): <strong>${stats.search_appearances_7d}</strong></li>
-                </ul>
-            </div>
-            <textarea id="json-output" readonly style="
-                width: 100%; height: 200px; background: #0f0f0f;
-                color: #0aff9d; border: 1px solid #333;
-                padding: 15px; font-family: monospace; margin-bottom: 15px;
-            ">${json}</textarea>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button id="copy-btn" style="padding: 10px 20px; background: linear-gradient(135deg, #0aff9d, #00d4ff); color: #0f0f0f; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">📋 Copy</button>
-                <button id="download-btn" style="padding: 10px 20px; background: linear-gradient(135deg, #00d4ff, #0aff9d); color: #0f0f0f; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Download</button>
-                <button id="close-btn" style="padding: 10px 20px; background: #333; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Close</button>
-            </div>
-        `;
-
-        modal.appendChild(content);
-        document.body.appendChild(modal);
-
-        document.getElementById("copy-btn").addEventListener("click", () => {
-            navigator.clipboard.writeText(json);
-            alert("✅ Copied!");
+        // Copy to clipboard
+        navigator.clipboard.writeText(json).then(() => {
+            console.log("✅ JSON copied to clipboard!");
+        }).catch(err => {
+            console.error("❌ Copy failed:", err);
+            // Fallback: show JSON in prompt for manual copy
+            prompt("Copy this JSON:", json);
         });
 
-        document.getElementById("download-btn").addEventListener("click", () => {
+        // Auto-download
+        try {
             const blob = new Blob([json], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
             a.download = `linkedin-stats-${new Date().toISOString().split("T")[0]}.json`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        });
-
-        document.getElementById("close-btn").addEventListener("click", () => modal.remove());
-        modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+            console.log("💾 JSON file downloaded!");
+        } catch (err) {
+            console.error("❌ Download failed:", err);
+        }
     };
 
     setTimeout(() => {
