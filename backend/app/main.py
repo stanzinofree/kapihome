@@ -50,9 +50,11 @@ async def get_linkedin():
             updated_str = "Unknown"
         
         # Build HTML response
+        avatar_url = profile.get('avatar_url', '')
+        
         html = f"""
         <div class="linkedin-header">
-            <img src="{profile.get('avatar_url', '')}" alt="{profile.get('name', '')}" class="linkedin-avatar" />
+            <img src="{avatar_url}" alt="{profile.get('name', '')}" class="linkedin-avatar" onerror="this.style.display='none'" crossorigin="anonymous" />
             <div class="linkedin-info">
                 <h3>{profile.get('name', 'Alessandro Middei')}</h3>
                 <p class="title">{profile.get('title', '')}</p>
@@ -64,29 +66,41 @@ async def get_linkedin():
             {profile.get('headline', '')}
         </div>
         
-        <div class="linkedin-stats">
-            <div class="stat-item">
-                <span class="stat-value">{stats.get('profile_views_7d', 0)}</span>
-                <span class="stat-label">Profile Views (7d)</span>
+        <div class="linkedin-stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('profile_views_7d', 0)}</span>
+                    <span class="stat-label">Profile Views</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 75%;"></div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-item">
-                <span class="stat-value">{stats.get('post_impressions_7d', 0)}</span>
-                <span class="stat-label">Post Impressions (7d)</span>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('post_impressions_7d', 0)}</span>
+                    <span class="stat-label">Post Impressions</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 85%;"></div>
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="linkedin-badge">
-            💼 {profile.get('current_company', '')} | 🎓 {profile.get('current_school', '')}
+            💼 {profile.get('current_company', '')}
         </div>
         
         <div class="linkedin-actions">
             <a href="https://www.linkedin.com/in/stanzinofree/" target="_blank" class="btn-linkedin">
-                View Full Profile
+                View Full Profile →
             </a>
         </div>
         
         <div class="linkedin-last-update">
-            Last updated: {updated_str}
+            🔄 Last sync: {updated_str}
         </div>
         """
         
