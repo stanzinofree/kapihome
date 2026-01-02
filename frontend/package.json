@@ -1,0 +1,17 @@
+{
+  "name": "kapihome-frontend",
+  "version": "0.1.0",
+  "description": "KapiHome Frontend - Zen Capibara Style",
+  "scripts": {
+    "dev": "bun run --hot src/server.ts",
+    "build": "bun build src/server.ts --outdir=dist",
+    "start": "bun run dist/server.js"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8",
+    "htmx.org": "^1.9.10"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

@@ -1,0 +1,73 @@
+:root {
+  --primary: #6200EE;
+  --secondary: #03DAC6;
+  --accent: #FF00FF;
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --text: #1C1B1F;
+  --border: #3px solid #000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.hero {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--surface);
+  border: var(--border);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+  margin-bottom: 2rem;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.microcard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.microcard {
+  background: var(--surface);
+  border: var(--border);
+  padding: 1.5rem;
+  box-shadow: 6px 6px 0 rgba(98, 0, 238, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.microcard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 rgba(255, 0, 255, 0.4);
+}
+
+.microcard h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  color: var(--primary);
+}

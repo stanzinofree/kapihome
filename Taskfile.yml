@@ -1,0 +1,65 @@
+version: '3'
+
+tasks:
+  dev:
+    desc: Start development environment
+    cmds:
+      - docker-compose up -d
+      - echo "Development environment started"
+      - echo "Backend -> http://localhost:8000"
+      - echo "Frontend -> http://localhost:3000"
+
+  build:
+    desc: Build all containers
+    cmds:
+      - docker-compose build
+      - echo "All containers built successfully"
+
+  stop:
+    desc: Stop all services
+    cmds:
+      - docker-compose down
+      - echo "All services stopped"
+
+  restart:
+    desc: Restart all services
+    cmds:
+      - docker-compose restart
+      - echo "All services restarted"
+
+  logs:
+    desc: Show logs from all services
+    cmds:
+      - docker-compose logs -f
+
+  logs-backend:
+    desc: Show backend logs
+    cmds:
+      - docker-compose logs -f backend
+
+  logs-frontend:
+    desc: Show frontend logs
+    cmds:
+      - docker-compose logs -f frontend
+
+  clean:
+    desc: Clean up containers, volumes and cache
+    cmds:
+      - docker-compose down -v
+      - rm -rf data/*.json
+      - echo "Cleanup completed"
+
+  ps:
+    desc: Show running containers
+    cmds:
+      - docker-compose ps
+
+  shell-backend:
+    desc: Open shell in backend container
+    cmds:
+      - docker-compose exec backend /bin/bash
+
+  shell-frontend:
+    desc: Open shell in frontend container
+    cmds:
+      - docker-compose exec frontend /bin/sh

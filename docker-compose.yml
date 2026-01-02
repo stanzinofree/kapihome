@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: kapihome-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+    networks:
+      - kapihome-network
+
+  frontend:
+    build: ./frontend
+    container_name: kapihome-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - kapihome-network
+    depends_on:
+      - backend
+
+networks:
+  kapihome-network:
+    driver: bridge
+
+volumes:
+  data:
