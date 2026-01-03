@@ -28,9 +28,17 @@
     // Extract courses from current page
     function extractCoursesFromCurrentPage() {
         const courses = [];
-        const courseCards = document.querySelectorAll('[data-purpose="enrolled-course-card"]');
         
-        console.log(`Found ${courseCards.length} course cards on page`);
+        // Try multiple selectors
+        let courseCards = document.querySelectorAll('[data-purpose="enrolled-course-card"]');
+        if (courseCards.length === 0) {
+            courseCards = document.querySelectorAll('[data-purpose="course-card"]');
+        }
+        if (courseCards.length === 0) {
+            courseCards = document.querySelectorAll('.course-card');
+        }
+        
+        console.log(`Found ${courseCards.length} course cards on page with selector`);
         
         courseCards.forEach(card => {
             const titleEl = card.querySelector('h3') || card.querySelector('[data-purpose="course-title"]');
@@ -109,12 +117,16 @@
         status.style.cssText = 'font-size: 12px; margin-bottom: 10px; color: #666;';
         
         if (pageType === 'main') {
-            const courses = extractCoursesFromCurrentPage();
             const stats = extractWeeklyStats();
+            const courses = extractCoursesFromCurrentPage();
+            
+            console.log('Main page stats:', stats);
+            console.log('Main page courses:', courses.length);
             
             status.innerHTML = `
                 Step 1/3: Main page ✅<br>
                 Total courses: ${stats.totalEnrolled}<br>
+                Visible cards: ${courses.length}<br>
                 Weekly: ${stats.currentMinutes}/${stats.goalMinutes} min
             `;
             
@@ -145,9 +157,12 @@
         } else if (pageType === 'in-progress') {
             const courses = extractCoursesFromCurrentPage();
             
+            console.log('In-progress courses:', courses);
+            
             status.innerHTML = `
                 Step 2/3: In-Progress ✅<br>
-                Found: ${courses.length} courses
+                Found: ${courses.length} courses<br>
+                ${courses.length > 0 ? `First: ${courses[0].title.substring(0, 30)}...` : 'No courses found!'}
             `;
             
             const btnNotStarted = document.createElement('button');
@@ -175,9 +190,12 @@
         } else if (pageType === 'not-started') {
             const courses = extractCoursesFromCurrentPage();
             
+            console.log('Not-started courses:', courses);
+            
             status.innerHTML = `
                 Step 3/3: Not-Started ✅<br>
-                Found: ${courses.length} courses
+                Found: ${courses.length} courses<br>
+                ${courses.length > 0 ? `First: ${courses[0].title.substring(0, 30)}...` : 'No courses found!'}
             `;
             
             const btnExport = document.createElement('button');
@@ -269,6 +287,16 @@
               'You can now go back to My Courses main page.');
     }
 
-    // Initialize after page load
-    setTimeout(createNavigationUI, 2000);
+    // Initialize after page load - wait for dynamic content
+    function init() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(createNavigationUI, 3000);
+            });
+        } else {
+            setTimeout(createNavigationUI, 3000);
+        }
+    }
+    
+    init();
 })();
