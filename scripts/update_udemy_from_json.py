@@ -16,8 +16,8 @@ from pathlib import Path
 from datetime import datetime
 
 
-def find_latest_udemy_file() -> str:
-    """Find the latest udemy*.json in data_tmp/"""
+def find_udemy_files() -> dict:
+    """Find the 3 Udemy JSON files in data_tmp/"""
     data_tmp = Path(__file__).parent.parent / "data_tmp"
     
     if not data_tmp.exists():
@@ -26,42 +26,104 @@ def find_latest_udemy_file() -> str:
             "Create it with: mkdir data_tmp"
         )
     
-    udemy_files = list(data_tmp.glob("udemy*.json"))
+    # Find each type of file
+    stats_files = list(data_tmp.glob("udemy-stats*.json"))
+    in_progress_files = list(data_tmp.glob("udemy-in-progress*.json"))
+    not_started_files = list(data_tmp.glob("udemy-not-started*.json"))
     
-    if not udemy_files:
+    files = {}
+    
+    if stats_files:
+        stats_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        files['stats'] = stats_files[0]
+        print(f"📊 Stats: {files['stats'].name}")
+    
+    if in_progress_files:
+        in_progress_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        files['in_progress'] = in_progress_files[0]
+        print(f"📚 In-Progress: {files['in_progress'].name}")
+    
+    if not_started_files:
+        not_started_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        files['not_started'] = not_started_files[0]
+        print(f"📝 Not-Started: {files['not_started'].name}")
+    
+    if not files:
         raise FileNotFoundError(
-            "No udemy*.json files found in data_tmp/\n"
-            "Run the Tampermonkey script first and move the downloaded file to data_tmp/"
+            "No udemy-*.json files found in data_tmp/\n\n"
+            "Run these 3 Tampermonkey scripts:\n"
+            "1. udemy-main-stats-extractor.user.js (on /home/my-courses/)\n"
+            "2. udemy-in-progress-extractor.user.js (on /learning/?progress_filter=in-progress)\n"
+            "3. udemy-not-started-extractor.user.js (on /learning/?progress_filter=not-started)\n\n"
+            "Move all downloaded files to data_tmp/"
         )
     
-    # Sort by modification time, most recent first
-    udemy_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    latest = udemy_files[0]
-    
-    print(f"📁 Auto-detected file: {latest.name}")
-    print(f"   Modified: {datetime.fromtimestamp(latest.stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    return str(latest)
+    return files
 
 
-def load_json(file_path: str) -> dict:
-    """Load and validate JSON file"""
-    path = Path(file_path)
+def load_and_combine_files(files: dict) -> dict:
+    """Load and combine the 3 JSON files into final structure"""
     
-    if not path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
+    # Load stats file
+    stats_data = {}
+    if 'stats' in files:
+        with open(files['stats'], 'r', encoding='utf-8') as f:
+            stats_json = json.load(f)
+            stats_data = stats_json.get('stats', {})
     
-    with open(path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    # Load in-progress courses
+    in_progress_courses = []
+    if 'in_progress' in files:
+        with open(files['in_progress'], 'r', encoding='utf-8') as f:
+            in_progress_json = json.load(f)
+            in_progress_courses = in_progress_json.get('courses', [])
     
-    # Validate structure
-    required_keys = ['student', 'stats']
-    missing_keys = [k for k in required_keys if k not in data]
+    # Load not-started courses
+    not_started_courses = []
+    if 'not_started' in files:
+        with open(files['not_started'], 'r', encoding='utf-8') as f:
+            not_started_json = json.load(f)
+            not_started_courses = not_started_json.get('courses', [])
     
-    if missing_keys:
-        raise ValueError(f"Invalid data structure. Missing keys: {missing_keys}")
+    # Separate completed from in-progress
+    completed_courses = [c for c in in_progress_courses if c.get('progress', 0) >= 100]
+    actual_in_progress = [c for c in in_progress_courses if 0 < c.get('progress', 0) < 100]
     
-    return data
+    # Calculate totals
+    total_courses = stats_data.get('total_courses', 0)
+    if total_courses == 0:
+        total_courses = len(completed_courses) + len(actual_in_progress) + len(not_started_courses)
+    
+    completion_rate = int((len(completed_courses) / total_courses * 100)) if total_courses > 0 else 0
+    
+    # Build combined data structure
+    combined_data = {
+        "student": {
+            "total_courses": total_courses,
+            "completed_courses": len(completed_courses),
+            "in_progress_courses": len(actual_in_progress),
+            "weekly_minutes_current": stats_data.get('weekly_minutes_current', 0),
+            "weekly_minutes_goal": stats_data.get('weekly_minutes_goal', 30),
+            "visits_this_week": stats_data.get('visits_this_week', 0),
+            "visits_last_week": stats_data.get('visits_last_week', 0),
+            "weekly_streak": stats_data.get('weekly_streak', 0)
+        },
+        "stats": {
+            "total_enrolled": total_courses,
+            "completed": len(completed_courses),
+            "in_progress": len(actual_in_progress),
+            "completion_rate": completion_rate,
+            "weekly_minutes": f"{stats_data.get('weekly_minutes_current', 0)}/{stats_data.get('weekly_minutes_goal', 30)}",
+            "weekly_visits": f"{stats_data.get('visits_this_week', 0)}/{stats_data.get('visits_last_week', 0)}",
+            "streak_weeks": stats_data.get('weekly_streak', 0)
+        },
+        "completed_courses": completed_courses[:20],
+        "in_progress_courses": actual_in_progress[:20],
+        "not_started_courses": not_started_courses[:20],
+        "last_updated": datetime.now().isoformat()
+    }
+    
+    return combined_data
 
 
 def show_diff(new_data: dict, old_data: dict | None):
@@ -131,16 +193,22 @@ def save_data(data: dict, dest_path: Path):
 def main():
     """Main execution"""
     try:
-        # Determine source file
-        if len(sys.argv) > 1:
-            source_file = sys.argv[1]
-            print(f"📁 Using specified file: {source_file}")
-        else:
-            source_file = find_latest_udemy_file()
+        print("🔍 Searching for Udemy JSON files in data_tmp/...\n")
         
-        # Load new data
-        print(f"\n📖 Loading data from: {source_file}")
-        new_data = load_json(source_file)
+        # Find the 3 files
+        files = find_udemy_files()
+        
+        if len(files) < 3:
+            print("\n⚠️  Warning: Not all files found!")
+            print("Missing files will use default values (0)")
+            response = input("\nContinue anyway? [y/N]: ").strip().lower()
+            if response != 'y':
+                print("\n❌ Import cancelled")
+                return 1
+        
+        # Load and combine data
+        print(f"\n📖 Combining data from {len(files)} file(s)...")
+        new_data = load_and_combine_files(files)
         
         # Load existing data if available
         dest_path = Path(__file__).parent.parent / "data" / "udemy.json"
