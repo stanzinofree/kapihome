@@ -37,7 +37,7 @@
     }
 
     async function extractCoursesFromPage(url) {
-        """Extract courses from a specific URL"""
+        // Extract courses from a specific URL
         const response = await fetch(url);
         const html = await response.text();
         const parser = new DOMParser();
