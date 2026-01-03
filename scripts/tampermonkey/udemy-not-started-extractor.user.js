@@ -12,14 +12,38 @@
 (function() {
     'use strict';
 
-    function createExportButton() {
-        const btn = document.createElement('button');
-        btn.innerHTML = '💾 Export Not-Started Courses';
-        btn.style.cssText = `
+    let isLoadingAll = false;
+
+    function createUI() {
+        const container = document.createElement('div');
+        container.style.cssText = `
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        `;
+        
+        const btnLoadAll = document.createElement('button');
+        btnLoadAll.innerHTML = '📜 Load All Courses';
+        btnLoadAll.style.cssText = `
+            padding: 12px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(92, 184, 92, 0.4);
+            font-size: 14px;
+        `;
+        btnLoadAll.addEventListener('click', loadAllCourses);
+        
+        const btnExport = document.createElement('button');
+        btnExport.innerHTML = '💾 Export Not-Started';
+        btnExport.style.cssText = `
             padding: 12px 20px;
             background: #EC5252;
             color: white;
@@ -30,8 +54,42 @@
             box-shadow: 0 4px 12px rgba(236, 82, 82, 0.4);
             font-size: 14px;
         `;
-        btn.addEventListener('click', extractCourses);
-        document.body.appendChild(btn);
+        btnExport.addEventListener('click', extractCourses);
+        
+        container.appendChild(btnLoadAll);
+        container.appendChild(btnExport);
+        document.body.appendChild(container);
+        
+        return { btnLoadAll, btnExport };
+    }
+
+    async function loadAllCourses() {
+        if (isLoadingAll) return;
+        isLoadingAll = true;
+        
+        const btn = document.querySelector('button');
+        const originalText = btn.textContent;
+        
+        btn.textContent = '⏳ Scrolling...';
+        btn.disabled = true;
+        
+        // Scroll to bottom multiple times to trigger lazy loading
+        for (let i = 0; i < 50; i++) {
+            window.scrollTo(0, document.body.scrollHeight);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Update button with progress
+            btn.textContent = `⏳ Loading... (${i + 1}/50)`;
+        }
+        
+        // Scroll back to top
+        window.scrollTo(0, 0);
+        
+        btn.textContent = '✅ All Loaded! Now Export';
+        btn.disabled = false;
+        isLoadingAll = false;
+        
+        alert('✅ Finished loading all courses!\n\nNow click "Export Not-Started" to extract data.');
     }
 
     function extractCourses() {
@@ -87,5 +145,5 @@
     }
 
     // Initialize after page load
-    setTimeout(createExportButton, 3000);
+    setTimeout(createUI, 3000);
 })();
