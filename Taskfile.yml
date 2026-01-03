@@ -96,6 +96,11 @@ tasks:
     cmds:
       - python3 scripts/update_exercism_from_json.py {{.CLI_ARGS}}
 
+  import-github:
+    desc: Import GitHub data from JSON file (auto-finds in data_tmp/ or pass path)
+    cmds:
+      - python3 scripts/update_github_from_json.py {{.CLI_ARGS}}
+
   update-exercism:
     desc: Complete Exercism data update workflow
     cmds:

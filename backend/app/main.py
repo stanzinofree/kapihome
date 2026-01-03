@@ -524,3 +524,222 @@ async def get_profile():
             content=f"<p>Error loading profile data: {str(e)}</p>",
             status_code=500
         )
+
+@app.get("/api/github/mini", response_class=HTMLResponse)
+async def get_github_mini():
+    """
+    Returns GitHub mini stats (4 metrics only) for homepage
+    """
+    data_path = Path("/app/data/github.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        stats = data.get("stats", {})
+        
+        # Build mini stats HTML - Only 4 cards
+        html = f"""
+        <h2 class="card-source-title gradient-text-github">GitHub</h2>
+        <div class="stats-grid-mini">
+            <div class="stat-card-mini">
+                <div class="stat-icon">📦</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('public_repos', 0)}</span>
+                    <span class="stat-label">Repositories</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('total_stars', 0)}</span>
+                    <span class="stat-label">Stars</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">👥</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('followers', 0)}</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-data">
+                    <span class="stat-value">{stats.get('current_streak', 0)}</span>
+                    <span class="stat-label">Day Streak</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="/github" class="btn btn-outline">View Details →</a>
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p class='text-muted-foreground'>GitHub data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p class='text-muted-foreground'>Error loading GitHub data</p>",
+            status_code=500
+        )
+
+@app.get("/api/github", response_class=HTMLResponse)
+async def get_github():
+    """
+    Returns GitHub profile data as HTML component for HTMX
+    """
+    data_path = Path("/app/data/github.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        profile = data.get("profile", {})
+        stats = data.get("stats", {})
+        top_languages = data.get("top_languages", [])
+        top_repos = data.get("top_repos", [])
+        recent_activity = data.get("recent_activity", [])
+        extracted_at = data.get("extracted_at", "")
+        
+        # Parse extracted_at
+        try:
+            updated_dt = datetime.fromisoformat(extracted_at.replace("Z", "+00:00"))
+            updated_str = updated_dt.strftime("%d %b %Y, %H:%M")
+        except:
+            updated_str = "Unknown"
+        
+        # Build stats cards
+        stats_html = f"""
+        <div class="github-stats-grid">
+            <div class="github-stat-card">
+                <div class="github-stat-icon">📦</div>
+                <div class="github-stat-data">
+                    <span class="github-stat-value">{stats.get('public_repos', 0)}</span>
+                    <span class="github-stat-label">Public Repositories</span>
+                </div>
+            </div>
+            <div class="github-stat-card">
+                <div class="github-stat-icon">⭐</div>
+                <div class="github-stat-data">
+                    <span class="github-stat-value">{stats.get('total_stars', 0)}</span>
+                    <span class="github-stat-label">Total Stars</span>
+                </div>
+            </div>
+            <div class="github-stat-card">
+                <div class="github-stat-icon">🍴</div>
+                <div class="github-stat-data">
+                    <span class="github-stat-value">{stats.get('total_forks', 0)}</span>
+                    <span class="github-stat-label">Total Forks</span>
+                </div>
+            </div>
+            <div class="github-stat-card">
+                <div class="github-stat-icon">👥</div>
+                <div class="github-stat-data">
+                    <span class="github-stat-value">{stats.get('followers', 0)}</span>
+                    <span class="github-stat-label">Followers</span>
+                </div>
+            </div>
+            <div class="github-stat-card">
+                <div class="github-stat-icon">📈</div>
+                <div class="github-stat-data">
+                    <span class="github-stat-value">{stats.get('contributions_last_year', 0)}</span>
+                    <span class="github-stat-label">Contributions (Year)</span>
+                </div>
+            </div>
+            <div class="github-stat-card">
+                <div class="github-stat-icon">🔥</div>
+                <div class="github-stat-data">
+                    <span class="github-stat-value">{stats.get('current_streak', 0)}</span>
+                    <span class="github-stat-label">Current Streak (days)</span>
+                </div>
+            </div>
+        </div>
+        """
+        
+        # Build languages section
+        languages_html = ""
+        for lang in top_languages[:5]:
+            languages_html += f"""
+            <div class="language-item">
+                <div class="language-header">
+                    <span class="language-name">{lang.get('name', 'Unknown')}</span>
+                    <span class="language-percentage">{lang.get('percentage', 0)}%</span>
+                </div>
+                <div class="language-bar">
+                    <div class="language-fill" style="width: {lang.get('percentage', 0)}%;"></div>
+                </div>
+            </div>
+            """
+        
+        languages_section = f"""
+        <div class="github-languages-section">
+            <h3 class="section-title">💻 Top Languages</h3>
+            <div class="languages-container">
+                {languages_html if languages_html else '<p class="no-content">No language data</p>'}
+            </div>
+        </div>
+        """ if top_languages else ""
+        
+        # Build repos section
+        repos_html = ""
+        for repo in top_repos[:6]:
+            repos_html += f"""
+            <a href="{repo.get('url', '#')}" target="_blank" class="repo-item">
+                <div class="repo-header">
+                    <span class="repo-name">{repo.get('name', 'Unknown')}</span>
+                    <span class="repo-lang">{repo.get('language', 'Unknown')}</span>
+                </div>
+                <p class="repo-description">{repo.get('description', 'No description')}</p>
+                <div class="repo-stats">
+                    <span>⭐ {repo.get('stars', 0)}</span>
+                    <span>🍴 {repo.get('forks', 0)}</span>
+                </div>
+            </a>
+            """
+        
+        repos_section = f"""
+        <div class="github-repos-section">
+            <h3 class="section-title">⭐ Top Repositories</h3>
+            <div class="repos-grid">
+                {repos_html if repos_html else '<p class="no-content">No repositories</p>'}
+            </div>
+        </div>
+        """ if top_repos else ""
+        
+        # Build complete HTML
+        username = profile.get("username", "stanzinofree")
+        html = f"""
+        <h2 class="card-source-title">GitHub</h2>
+        {stats_html}
+        {languages_section}
+        {repos_section}
+        
+        <div class="github-actions">
+            <a href="https://github.com/{username}" target="_blank" class="btn-github">
+                View GitHub Profile →
+            </a>
+        </div>
+        
+        <div class="github-last-update">
+            🔄 Last sync: {updated_str}
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p>GitHub data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p>Error loading GitHub data: {str(e)}</p>",
+            status_code=500
+        )

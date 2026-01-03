@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/static/css/linkedin-card.css">
     <link rel="stylesheet" href="/static/css/profile-card.css">
     <link rel="stylesheet" href="/static/css/exercism-card.css">
+    <link rel="stylesheet" href="/static/css/github-card.css">
     <script src="/static/js/theme-toggle.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
@@ -26,6 +27,7 @@
             <ul class="nav-links">
                 <li><a href="/" class="active">Home</a></li>
                 <li><a href="/linkedin">LinkedIn</a></li>
+                <li><a href="/github">GitHub</a></li>
                 <li><a href="/exercism">Exercism</a></li>
                 <li><a href="/about">About</a></li>
             </ul>
@@ -58,6 +60,11 @@
             <!-- Exercism Mini Stats (2/3 width - right column, below LinkedIn) -->
             <div class="exercism-card card-accent-exercism" hx-get="/api/exercism/mini" hx-trigger="load" hx-swap="innerHTML">
                 <div class="loading">Loading Exercism stats</div>
+            </div>
+            
+            <!-- GitHub Mini Stats (2/3 width - right column, below Exercism) -->
+            <div class="github-card card-accent-github" hx-get="/api/github/mini" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading GitHub stats</div>
             </div>
         </main>
     </div>

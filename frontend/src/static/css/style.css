@@ -156,6 +156,16 @@ body {
   background: linear-gradient(90deg, var(--exercism), var(--purple));
 }
 
+.card-accent-github::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--github), var(--accent));
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
@@ -371,6 +381,20 @@ h3 {
 
 .exercism-card-full:hover {
   box-shadow: 0 8px 24px color-mix(in oklch, var(--exercism) 15%, transparent);
+}
+
+.github-card-full {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px color-mix(in oklch, var(--foreground) 5%, transparent);
+  transition: all 0.3s ease;
+}
+
+.github-card-full:hover {
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--github) 15%, transparent);
 }
 
 /* Responsive */

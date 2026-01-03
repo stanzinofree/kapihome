@@ -283,10 +283,152 @@ Lo script:
 
 ---
 
+## 🐙 GitHub Stats Extractor
+
+Script per estrarre statistiche, repository e linguaggi da GitHub.
+
+**File**: `github-extractor.user.js`
+
+### Installazione
+
+1. Apri Tampermonkey Dashboard
+2. Click "+" per nuovo script
+3. Copia il contenuto di `github-extractor.user.js`
+4. Salva (Ctrl+S)
+
+### Utilizzo
+
+1. **Visita il tuo profilo GitHub**
+   - URL: `https://github.com/YOUR_USERNAME`
+
+2. **Estrai i dati**
+   - Apparirà un pulsante verde: **"💾 Export GitHub Stats"**
+   - Click sul pulsante
+   - Si aprirà un alert con il riepilogo dei dati estratti
+
+3. **File generato**
+   - JSON scaricato automaticamente: `github-data-YYYYMMDD-HHMMSS.json`
+   - JSON copiato negli appunti
+
+### Dati estratti
+
+```json
+{
+  "profile": {
+    "username": "stanzinofree",
+    "name": "Alessandro Middei",
+    "bio": "Full Stack Developer",
+    "location": "Rome, Italy",
+    "company": "Freelance",
+    "website": "https://middei.info",
+    "avatar_url": "https://avatars.githubusercontent.com/...",
+    "profile_url": "https://github.com/stanzinofree"
+  },
+  "stats": {
+    "followers": 42,
+    "following": 30,
+    "public_repos": 56,
+    "total_stars": 124,
+    "total_forks": 18,
+    "contributions_last_year": 847,
+    "current_streak": 12,
+    "longest_streak": 45
+  },
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 25,
+      "percentage": 45
+    },
+    {
+      "name": "JavaScript",
+      "count": 18,
+      "percentage": 32
+    }
+  ],
+  "top_repos": [
+    {
+      "name": "kapihome",
+      "full_name": "stanzinofree/kapihome",
+      "description": "Personal homepage",
+      "url": "https://github.com/stanzinofree/kapihome",
+      "stars": 15,
+      "forks": 3,
+      "language": "Python",
+      "updated_at": "2026-01-02T12:00:00Z"
+    }
+  ],
+  "recent_activity": [
+    {
+      "name": "kapihome",
+      "action": "Updated",
+      "date": "2026-01-02T12:00:00Z",
+      "url": "https://github.com/stanzinofree/kapihome"
+    }
+  ],
+  "extracted_at": "2026-01-02T15:30:00.000Z"
+}
+```
+
+### Integrazione con update_github_from_json.py
+
+```bash
+# 1. Estrai i dati dal browser con Tampermonkey
+# 2. Il file sarà in ~/Downloads/github-data-YYYYMMDD-HHMMSS.json
+# 3. Muovi il file in data_tmp/
+mv ~/Downloads/github-data-*.json data_tmp/
+
+# 4. Importa (auto-detect)
+task import-github
+
+# Oppure con Python diretto e path specifico
+python3 scripts/update_github_from_json.py ~/Downloads/github-data-20260102-153000.json
+```
+
+### Come funziona
+
+Lo script:
+1. Inserisce un pulsante verde sulla pagina del profilo GitHub
+2. Quando cliccato:
+   - Estrae dati dal profilo (nome, bio, avatar, location, company)
+   - Estrae statistiche visibili (followers, following)
+   - Chiama l'API pubblica GitHub (`https://api.github.com/users/{username}/repos`)
+   - Calcola total stars, forks dai repository
+   - Analizza i linguaggi più usati
+   - Estrae contribution calendar dal DOM (streak corrente e più lungo)
+   - Seleziona i top 6 repository per stelle
+   - Identifica i 10 repository aggiornati più di recente
+3. Genera un JSON completo con tutti i dati
+4. Scarica automaticamente il file e lo copia negli appunti
+
+### Troubleshooting
+
+**API rate limiting**:
+- L'API pubblica GitHub ha un limite di 60 richieste/ora senza autenticazione
+- Se raggiungi il limite, aspetta 1 ora prima di riprovare
+- Per limiti più alti, considera di usare un token personale (non implementato)
+
+**Contribution calendar non funziona**:
+- Assicurati di essere sulla pagina principale del profilo
+- Il contribution calendar deve essere visibile (scorri se necessario)
+- Lo script cerca elementi con `tool-tip[id*="contribution-day"]`
+
+**Repositories mancanti**:
+- Lo script recupera solo i primi 100 repository (ordinati per aggiornamento)
+- Repository privati non sono inclusi (solo pubblici)
+- Fork sono inclusi nelle stats ma filtrati dai "top repos"
+
+**Dati profilo mancanti**:
+- Alcuni campi potrebbero essere vuoti se non impostati nel profilo
+- Website, company, location sono opzionali
+
+---
+
 ## Note di sicurezza
 
 - Gli script NON inviano dati a server esterni
 - Funzionano solo in locale nel tuo browser
 - Non modificano nulla sui siti, sono read-only
 - I dati estratti rimangono solo sul tuo computer
-- L'API Exercism è pubblica e accessibile senza autenticazione
+- Le API GitHub/Exercism sono pubbliche e accessibili senza autenticazione
+- Nessun token o credenziale viene salvato o trasmesso

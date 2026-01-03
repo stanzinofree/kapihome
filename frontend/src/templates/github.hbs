@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn - {{title}}</title>
+    <title>GitHub - {{title}}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/theme.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/header.css">
-    <link rel="stylesheet" href="/static/css/linkedin-card.css">
+    <link rel="stylesheet" href="/static/css/github-card.css">
     <script src="/static/js/theme-toggle.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
@@ -22,8 +22,8 @@
             
             <ul class="nav-links">
                 <li><a href="/">Home</a></li>
-                <li><a href="/linkedin" class="active">LinkedIn</a></li>
-                <li><a href="/github">GitHub</a></li>
+                <li><a href="/linkedin">LinkedIn</a></li>
+                <li><a href="/github" class="active">GitHub</a></li>
                 <li><a href="/exercism">Exercism</a></li>
                 <li><a href="/about">About</a></li>
             </ul>
@@ -43,9 +43,9 @@
 
     <div class="container">
         <main class="content-full">
-            <!-- LinkedIn Full Data Card -->
-            <div class="linkedin-card-full card-accent-linkedin" hx-get="/api/linkedin" hx-trigger="load" hx-swap="innerHTML">
-                <div class="loading">Loading LinkedIn data...</div>
+            <!-- GitHub Full Data Card -->
+            <div class="github-card-full card-accent-github" hx-get="/api/github" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading GitHub data...</div>
             </div>
         </main>
     </div>

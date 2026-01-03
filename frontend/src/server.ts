@@ -60,6 +60,17 @@ const server = Bun.serve({
       });
     }
     
+    // Serve GitHub page
+    if (url.pathname === "/github") {
+      const templateFile = await Bun.file("src/templates/github.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "KapiHome - Zen Capibara" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
     // Serve static files
     if (url.pathname.startsWith("/static/")) {
       const filePath = url.pathname.replace("/static/", "src/static/");
