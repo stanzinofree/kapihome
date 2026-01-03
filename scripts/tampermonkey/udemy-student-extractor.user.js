@@ -40,14 +40,26 @@
         try {
             console.log('Starting Udemy student data extraction...');
             
-            // Extract enrolled courses count
-            const coursesInProgress = document.querySelectorAll('[data-purpose="course-card-in-progress"], .my-courses__course-card');
-            const totalCoursesEnrolled = coursesInProgress.length;
+            // Extract weekly goal stats from dashboard
+            const weeklyMinutesText = document.body.textContent;
             
-            // Try to get total from pagination or stats
-            let totalEnrolledText = document.querySelector('[data-purpose="enrolled-count"]')?.textContent || '';
-            let totalMatch = totalEnrolledText.match(/(\d+)/);
-            const totalEnrolled = totalMatch ? parseInt(totalMatch[1]) : totalCoursesEnrolled;
+            // Extract "0/30 minuti di corso"
+            const minutesMatch = weeklyMinutesText.match(/(\d+)\/(\d+)\s+minuti\s+di\s+corso/i);
+            const currentMinutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+            const goalMinutes = minutesMatch ? parseInt(minutesMatch[2]) : 30;
+            
+            // Extract "4/1 visita" (this week / last week)
+            const visitsMatch = weeklyMinutesText.match(/(\d+)\/(\d+)\s+visita/i);
+            const visitsThisWeek = visitsMatch ? parseInt(visitsMatch[1]) : 0;
+            const visitsLastWeek = visitsMatch ? parseInt(visitsMatch[2]) : 0;
+            
+            // Extract "0 settimane" (consecutive weeks streak)
+            const streakMatch = weeklyMinutesText.match(/(\d+)\s+settimane?/i);
+            const weeklyStreak = streakMatch ? parseInt(streakMatch[1]) : 0;
+            
+            // Extract total courses from pagination "1-12 di 341 corsi"
+            const paginationMatch = weeklyMinutesText.match(/\d+-\d+\s+di\s+(\d+)\s+corsi/i);
+            const totalEnrolled = paginationMatch ? parseInt(paginationMatch[1]) : 0;
             
             // Extract completed courses
             const completedCourses = [];
@@ -103,16 +115,20 @@
                     total_courses: totalEnrolled,
                     completed_courses: completedCourses.length,
                     in_progress_courses: inProgressCourses.length,
-                    courses_per_week: coursesViewedWeekly,
-                    total_learning_minutes: totalMinutesLearned,
-                    learning_streak_days: learningStreak
+                    weekly_minutes_current: currentMinutes,
+                    weekly_minutes_goal: goalMinutes,
+                    visits_this_week: visitsThisWeek,
+                    visits_last_week: visitsLastWeek,
+                    weekly_streak: weeklyStreak
                 },
                 stats: {
                     total_enrolled: totalEnrolled,
                     completed: completedCourses.length,
                     in_progress: inProgressCourses.length,
                     completion_rate: totalEnrolled > 0 ? Math.round((completedCourses.length / totalEnrolled) * 100) : 0,
-                    weekly_courses: coursesViewedWeekly
+                    weekly_minutes: `${currentMinutes}/${goalMinutes}`,
+                    weekly_visits: `${visitsThisWeek}/${visitsLastWeek}`,
+                    streak_weeks: weeklyStreak
                 },
                 completed_courses: completedCourses.slice(0, 10),
                 in_progress_courses: inProgressCourses.slice(0, 10),
@@ -126,12 +142,12 @@
             
             alert('✅ Udemy student data extracted successfully!\n\n' +
                   `Total Courses: ${totalEnrolled}\n` +
+                  `Weekly Minutes: ${currentMinutes}/${goalMinutes}\n` +
+                  `Weekly Visits: ${visitsThisWeek}/${visitsLastWeek}\n` +
+                  `Weekly Streak: ${weeklyStreak} settimane\n` +
                   `Completed: ${completedCourses.length}\n` +
-                  `In Progress: ${inProgressCourses.length}\n` +
-                  `Completion Rate: ${data.stats.completion_rate}%\n` +
-                  `Estimated Weekly: ${coursesViewedWeekly} courses\n\n` +
-                  'File downloaded: udemy.json\n\n' +
-                  'Note: Update courses_per_week manually based on your actual weekly learning!');
+                  `In Progress: ${inProgressCourses.length}\n\n` +
+                  'File downloaded: udemy.json');
             
         } catch (error) {
             console.error('Error extracting Udemy student data:', error);

@@ -677,30 +677,30 @@ async def get_udemy_mini():
                     <span class="stat-icon">📚</span>
                     <div class="stat-content">
                         <span class="stat-value">{student.get('total_courses', 0)}</span>
-                        <span class="stat-label">Enrolled</span>
+                        <span class="stat-label">Corsi totali</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon">✅</span>
+                    <span class="stat-icon">⏱️</span>
                     <div class="stat-content">
-                        <span class="stat-value">{student.get('completed_courses', 0)}</span>
-                        <span class="stat-label">Completed</span>
+                        <span class="stat-value">{student.get('weekly_minutes_current', 0)}/{student.get('weekly_minutes_goal', 30)}</span>
+                        <span class="stat-label">Minuti/settimana</span>
                     </div>
                 </div>
             </div>
             <div class="stat-row">
                 <div class="stat-item">
-                    <span class="stat-icon">📈</span>
+                    <span class="stat-icon">👀</span>
                     <div class="stat-content">
-                        <span class="stat-value">{stats.get('completion_rate', 0)}%</span>
-                        <span class="stat-label">Completion</span>
+                        <span class="stat-value">{student.get('visits_this_week', 0)}/{student.get('visits_last_week', 0)}</span>
+                        <span class="stat-label">Visite sett.</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon">📅</span>
+                    <span class="stat-icon">🔥</span>
                     <div class="stat-content">
-                        <span class="stat-value">{student.get('courses_per_week', 0)}/week</span>
-                        <span class="stat-label">Learning</span>
+                        <span class="stat-value">{student.get('weekly_streak', 0)}</span>
+                        <span class="stat-label">Sett. consecutive</span>
                     </div>
                 </div>
             </div>
