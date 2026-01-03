@@ -24,13 +24,14 @@ body {
   padding: 1.5rem 2rem;
 }
 
-/* Content Layout */
+/* Content Layout - Masonry Grid */
 .content {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: minmax(200px, auto);
+  grid-auto-rows: minmax(150px, auto);
   gap: 1.5rem;
   margin-top: 2rem;
+  grid-auto-flow: dense;
 }
 
 /* Full-width content for dedicated pages */
@@ -71,18 +72,23 @@ body {
   transform: translateY(-2px);
 }
 
-/* Profile Card - 1/3 width, spans 2 rows */
-.profile-card {
+/* Masonry Layout - All cards 1/3 width */
+.profile-card,
+.linkedin-card,
+.exercism-card,
+.github-card {
   grid-column: span 4;
-  grid-row: span 2;
   background-color: var(--card) !important;
   color: var(--card-foreground) !important;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2rem;
-  text-align: center;
   box-shadow: 0 2px 8px color-mix(in oklch, var(--foreground) 5%, transparent);
   transition: all 0.3s ease;
+}
+
+.profile-card {
+  text-align: center;
 }
 
 .profile-card:hover {
@@ -90,38 +96,18 @@ body {
   transform: translateY(-2px);
 }
 
-/* Stats Cards - 2/3 width, stacked vertically */
-.linkedin-card {
-  grid-column: span 8;
-  grid-row: span 1;
-  background-color: var(--card) !important;
-  color: var(--card-foreground) !important;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px color-mix(in oklch, var(--foreground) 5%, transparent);
-  transition: all 0.3s ease;
-}
-
 .linkedin-card:hover {
   box-shadow: 0 8px 24px color-mix(in oklch, var(--linkedin) 15%, transparent);
   transform: translateY(-2px);
 }
 
-.exercism-card {
-  grid-column: span 8;
-  grid-row: span 1;
-  background-color: var(--card) !important;
-  color: var(--card-foreground) !important;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px color-mix(in oklch, var(--foreground) 5%, transparent);
-  transition: all 0.3s ease;
-}
-
 .exercism-card:hover {
   box-shadow: 0 8px 24px color-mix(in oklch, var(--exercism) 15%, transparent);
+  transform: translateY(-2px);
+}
+
+.github-card:hover {
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--github) 15%, transparent);
   transform: translateY(-2px);
 }
 
