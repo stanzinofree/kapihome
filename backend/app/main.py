@@ -657,7 +657,8 @@ async def get_cal_mini():
 @app.get("/api/udemy/mini", response_class=HTMLResponse)
 async def get_udemy_mini():
     """
-    Returns Udemy instructor mini stats card for homepage
+    Returns Udemy student learning stats card for homepage
+    Shows enrolled courses, completed, and weekly learning activity
     """
     data_path = Path("/app/data/udemy.json")
     
@@ -665,45 +666,41 @@ async def get_udemy_mini():
         with open(data_path, "r") as f:
             data = json.load(f)
         
-        instructor = data.get("instructor", {})
+        student = data.get("student", {})
         stats = data.get("stats", {})
-        courses = data.get("courses", [])
-        
-        # Get top course
-        top_course = courses[0] if courses else {}
         
         html = f"""
-        <h2 class="card-source-title gradient-text-udemy">Udemy Instructor</h2>
+        <h2 class="card-source-title gradient-text-udemy">Udemy Learning</h2>
         <div class="udemy-stats-mini">
             <div class="stat-row">
                 <div class="stat-item">
-                    <span class="stat-icon">👨‍🏫</span>
+                    <span class="stat-icon">📚</span>
                     <div class="stat-content">
-                        <span class="stat-value">{stats.get('total_students', 0):,}</span>
-                        <span class="stat-label">Students</span>
+                        <span class="stat-value">{student.get('total_courses', 0)}</span>
+                        <span class="stat-label">Enrolled</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon">📚</span>
+                    <span class="stat-icon">✅</span>
                     <div class="stat-content">
-                        <span class="stat-value">{stats.get('total_courses', 0)}</span>
-                        <span class="stat-label">Courses</span>
+                        <span class="stat-value">{student.get('completed_courses', 0)}</span>
+                        <span class="stat-label">Completed</span>
                     </div>
                 </div>
             </div>
             <div class="stat-row">
                 <div class="stat-item">
-                    <span class="stat-icon">⭐</span>
+                    <span class="stat-icon">📈</span>
                     <div class="stat-content">
-                        <span class="stat-value">{stats.get('average_rating', 0)}</span>
-                        <span class="stat-label">Avg Rating</span>
+                        <span class="stat-value">{stats.get('completion_rate', 0)}%</span>
+                        <span class="stat-label">Completion</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon">💬</span>
+                    <span class="stat-icon">📅</span>
                     <div class="stat-content">
-                        <span class="stat-value">{stats.get('total_reviews', 0):,}</span>
-                        <span class="stat-label">Reviews</span>
+                        <span class="stat-value">{student.get('courses_per_week', 0)}/week</span>
+                        <span class="stat-label">Learning</span>
                     </div>
                 </div>
             </div>
