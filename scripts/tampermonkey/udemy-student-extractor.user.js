@@ -5,7 +5,7 @@
 // @description  Extract Udemy student learning statistics for KapiHome
 // @author       Alessandro Middei
 // @match        https://www.udemy.com/home/my-courses/*
-// @match        https://www.udemy.com/home/learning/*
+// @match        https://www.udemy.com/home/my-courses/learning/*
 // @icon         https://www.udemy.com/staticx/udemy/images/v7/logo-udemy.svg
 // @grant        none
 // ==/UserScript==
@@ -36,9 +36,51 @@
         document.body.appendChild(btn);
     }
 
+    async function extractCoursesFromPage(url) {
+        """Extract courses from a specific URL"""
+        const response = await fetch(url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const courses = [];
+        const courseCards = doc.querySelectorAll('[data-purpose="enrolled-course-card"]');
+        
+        courseCards.forEach(card => {
+            const titleEl = card.querySelector('h3') || card.querySelector('[data-purpose="course-title"]');
+            const title = titleEl?.textContent.trim() || 'Unknown Course';
+            
+            const cardText = card.textContent;
+            const percentMatch = cardText.match(/(\d+)%\s+completato/i);
+            const isNotStarted = cardText.includes('INIZIA IL CORSO');
+            
+            let progress = 0;
+            if (percentMatch) {
+                progress = parseInt(percentMatch[1]);
+            } else if (isNotStarted) {
+                progress = 0;
+            }
+            
+            const imageEl = card.querySelector('img');
+            const linkEl = card.querySelector('a[href*="/course/"]');
+            
+            courses.push({
+                title: title,
+                progress: progress,
+                image: imageEl?.src || '',
+                url: linkEl?.href || window.location.origin + linkEl?.getAttribute('href') || ''
+            });
+        });
+        
+        return courses;
+    }
+
     async function extractUdemyStudentData() {
         try {
             console.log('Starting Udemy student data extraction...');
+            
+            const btn = document.querySelector('button[style*="fixed"]');
+            if (btn) btn.textContent = '⏳ Extracting...';
             
             // Extract weekly goal stats from dashboard
             const weeklyMinutesText = document.body.textContent;
@@ -61,58 +103,27 @@
             const paginationMatch = weeklyMinutesText.match(/(\d+)-\d+\s+di\s+(\d+)\s+corsi/i);
             let totalEnrolled = paginationMatch ? parseInt(paginationMatch[2]) : 0;
             
-            // Extract all course cards
-            const completedCourses = [];
-            const inProgressCourses = [];
-            const notStartedCourses = [];
+            console.log('Fetching in-progress courses...');
+            const inProgressUrl = 'https://www.udemy.com/home/my-courses/learning/?progress_filter=in-progress';
+            const inProgressCourses = await extractCoursesFromPage(inProgressUrl);
+            console.log(`Found ${inProgressCourses.length} in-progress courses`);
             
-            // Parse each course card
-            const courseCards = document.querySelectorAll('[data-purpose="enrolled-course-card"]');
-            console.log(`Found ${courseCards.length} course cards`);
+            console.log('Fetching not-started courses...');
+            const notStartedUrl = 'https://www.udemy.com/home/my-courses/learning/?progress_filter=not-started';
+            const notStartedCourses = await extractCoursesFromPage(notStartedUrl);
+            console.log(`Found ${notStartedCourses.length} not-started courses`);
             
-            courseCards.forEach((card, index) => {
-                // Get title
-                const titleEl = card.querySelector('h3') || card.querySelector('[data-purpose="course-title"]');
-                const title = titleEl?.textContent.trim() || 'Unknown Course';
-                
-                // Get progress text - look for "17% completato" or "INIZIA IL CORSO"
-                const cardText = card.textContent;
-                const percentMatch = cardText.match(/(\d+)%\s+completato/i);
-                const isNotStarted = cardText.includes('INIZIA IL CORSO');
-                
-                let progress = 0;
-                if (percentMatch) {
-                    progress = parseInt(percentMatch[1]);
-                } else if (isNotStarted) {
-                    progress = 0;
-                }
-                
-                // Get image and URL
-                const imageEl = card.querySelector('img');
-                const linkEl = card.querySelector('a[href*="/course/"]');
-                
-                const courseData = {
-                    title: title,
-                    progress: progress,
-                    image: imageEl?.src || '',
-                    url: linkEl?.href || window.location.origin + linkEl?.getAttribute('href') || ''
-                };
-                
-                if (progress >= 100) {
-                    completedCourses.push(courseData);
-                } else if (progress > 0) {
-                    inProgressCourses.push(courseData);
-                } else {
-                    notStartedCourses.push(courseData);
-                }
-            });
+            // Separate courses by completion status
+            const completedCourses = inProgressCourses.filter(c => c.progress >= 100);
+            const actualInProgress = inProgressCourses.filter(c => c.progress > 0 && c.progress < 100);
             
-            // If pagination didn't work, use card count
+            // Calculate totals
+            const totalCourses = completedCourses.length + actualInProgress.length + notStartedCourses.length;
             if (totalEnrolled === 0) {
-                totalEnrolled = courseCards.length;
+                totalEnrolled = totalCourses;
             }
             
-            console.log(`Total: ${totalEnrolled}, Completed: ${completedCourses.length}, In Progress: ${inProgressCourses.length}, Not Started: ${notStartedCourses.length}`);
+            console.log(`Total: ${totalEnrolled}, Completed: ${completedCourses.length}, In Progress: ${actualInProgress.length}, Not Started: ${notStartedCourses.length}`);
             
             // Extract learning stats from dashboard if available
             let totalMinutesLearned = 0;
@@ -134,7 +145,7 @@
                 student: {
                     total_courses: totalEnrolled,
                     completed_courses: completedCourses.length,
-                    in_progress_courses: inProgressCourses.length,
+                    in_progress_courses: actualInProgress.length,
                     weekly_minutes_current: currentMinutes,
                     weekly_minutes_goal: goalMinutes,
                     visits_this_week: visitsThisWeek,
@@ -144,15 +155,15 @@
                 stats: {
                     total_enrolled: totalEnrolled,
                     completed: completedCourses.length,
-                    in_progress: inProgressCourses.length,
+                    in_progress: actualInProgress.length,
                     completion_rate: totalEnrolled > 0 ? Math.round((completedCourses.length / totalEnrolled) * 100) : 0,
                     weekly_minutes: `${currentMinutes}/${goalMinutes}`,
                     weekly_visits: `${visitsThisWeek}/${visitsLastWeek}`,
                     streak_weeks: weeklyStreak
                 },
-                completed_courses: completedCourses.slice(0, 10),
-                in_progress_courses: inProgressCourses.slice(0, 10),
-                not_started_courses: notStartedCourses.slice(0, 10),
+                completed_courses: completedCourses.slice(0, 20),
+                in_progress_courses: actualInProgress.slice(0, 20),
+                not_started_courses: notStartedCourses.slice(0, 20),
                 last_updated: new Date().toISOString()
             };
             
@@ -161,10 +172,12 @@
             // Download as JSON
             downloadJSON(data, 'udemy.json');
             
+            if (btn) btn.textContent = '💾 Export Student Stats';
+            
             alert('✅ Udemy student data extracted successfully!\n\n' +
                   `Total Courses: ${totalEnrolled}\n` +
                   `Completed: ${completedCourses.length}\n` +
-                  `In Progress: ${inProgressCourses.length}\n` +
+                  `In Progress: ${actualInProgress.length}\n` +
                   `Not Started: ${notStartedCourses.length}\n\n` +
                   `Weekly Minutes: ${currentMinutes}/${goalMinutes}\n` +
                   `Weekly Visits: ${visitsThisWeek}/${visitsLastWeek}\n` +
