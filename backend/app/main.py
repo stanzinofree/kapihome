@@ -461,7 +461,8 @@ async def get_exercism():
 @app.get("/api/profile", response_class=HTMLResponse)
 async def get_profile():
     """
-    Returns profile card with photo and bio data as HTML component for HTMX
+    Returns profile row with 3 columns: Photo | Info | Work/Contact
+    Full-width layout for homepage
     """
     data_path = Path("/app/data/linkedin.json")
     
@@ -471,44 +472,68 @@ async def get_profile():
         
         profile = data.get("profile", {})
         
-        # Build profile card HTML
+        # Build profile row HTML - 3 columns layout
         html = f"""
-        <img src="{profile.get('avatar_url', '/static/images/avatar.jpg')}" 
-             alt="{profile.get('name', 'Alessandro Middei')}" 
-             class="profile-avatar" />
-        
-        <h2 class="profile-name">{profile.get('name', 'Alessandro Middei')}</h2>
-        
-        <div class="profile-section">
-            <h4 class="profile-section-title">Job Position</h4>
-            <p class="profile-text">{profile.get('job_position', '')}</p>
+        <!-- Column 1: Photo (1/3) -->
+        <div class="profile-photo-col">
+            <img src="{profile.get('avatar_url', '/static/images/avatar.jpg')}" 
+                 alt="{profile.get('name', 'Alessandro Middei')}" 
+                 class="profile-avatar-large" />
+            <h2 class="profile-name">{profile.get('name', 'Alessandro Middei')}</h2>
         </div>
         
-        <div class="profile-section">
-            <h4 class="profile-section-title">Attitudini</h4>
-            <p class="profile-text">{profile.get('attitude', '')}</p>
+        <!-- Column 2: Info (1/3) -->
+        <div class="profile-info-col">
+            <h4 class="profile-col-title">Info</h4>
+            <div class="profile-info-item">
+                <strong>Job Position:</strong>
+                <p>{profile.get('job_position', '')}</p>
+            </div>
+            <div class="profile-info-item">
+                <strong>Attitudini:</strong>
+                <p>{profile.get('attitude', '')}</p>
+            </div>
+            <div class="profile-info-item">
+                <strong>Bio:</strong>
+                <p>{profile.get('headline', '')}</p>
+            </div>
         </div>
         
-        <div class="profile-section">
-            <h4 class="profile-section-title">Bio</h4>
-            <p class="profile-text">{profile.get('headline', '')}</p>
-        </div>
-        
-        <div class="profile-location">
-            <span>📍</span>
-            <span>{profile.get('location', '')}</span>
-        </div>
-        
-        <div class="profile-company">
-            <span>💼</span>
-            <a href="{profile.get('current_company_url', '#')}" target="_blank" rel="noopener">
-                {profile.get('current_company', '')}
-            </a>
-        </div>
-        
-        <div class="profile-connections">
-            <span>🤝</span>
-            <span>{profile.get('connections', '500+')} connections</span>
+        <!-- Column 3: Work & Contact (1/3) -->
+        <div class="profile-contact-col">
+            <h4 class="profile-col-title">Work & Contact</h4>
+            <div class="profile-contact-item">
+                <span class="contact-icon">💼</span>
+                <div class="contact-content">
+                    <strong>Current Work</strong>
+                    <a href="{profile.get('current_company_url', '#')}" target="_blank" rel="noopener">
+                        {profile.get('current_company', '')}
+                    </a>
+                </div>
+            </div>
+            <div class="profile-contact-item">
+                <span class="contact-icon">📍</span>
+                <div class="contact-content">
+                    <strong>Location</strong>
+                    <span>{profile.get('location', '')}</span>
+                </div>
+            </div>
+            <div class="profile-contact-item">
+                <span class="contact-icon">✉️</span>
+                <div class="contact-content">
+                    <strong>Email</strong>
+                    <a href="mailto:alessandro@middei.info">alessandro@middei.info</a>
+                </div>
+            </div>
+            <div class="profile-contact-item">
+                <span class="contact-icon">📞</span>
+                <div class="contact-content">
+                    <strong>Book a Call</strong>
+                    <a href="https://cal.com/alessandro-middei-8eimru" target="_blank" rel="noopener" class="cal-link">
+                        Schedule on Cal.com →
+                    </a>
+                </div>
+            </div>
         </div>
         """
         
@@ -595,7 +620,7 @@ async def get_cal_mini():
     Returns Cal.com booking card for homepage
     """
     # Static data - customize with your Cal.com link
-    booking_url = "https://cal.com/alessandromiddei"
+    booking_url = "https://cal.com/alessandro-middei-8eimru"
     
     # You can add real API integration here if needed
     # For now, showing static CTA
