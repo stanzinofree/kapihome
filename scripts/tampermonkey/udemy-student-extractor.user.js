@@ -58,41 +58,61 @@
             const weeklyStreak = streakMatch ? parseInt(streakMatch[1]) : 0;
             
             // Extract total courses from pagination "1-12 di 341 corsi"
-            const paginationMatch = weeklyMinutesText.match(/\d+-\d+\s+di\s+(\d+)\s+corsi/i);
-            const totalEnrolled = paginationMatch ? parseInt(paginationMatch[1]) : 0;
+            const paginationMatch = weeklyMinutesText.match(/(\d+)-\d+\s+di\s+(\d+)\s+corsi/i);
+            let totalEnrolled = paginationMatch ? parseInt(paginationMatch[2]) : 0;
             
-            // Extract completed courses
+            // Extract all course cards
             const completedCourses = [];
             const inProgressCourses = [];
+            const notStartedCourses = [];
             
             // Parse each course card
-            document.querySelectorAll('[data-purpose="course-card"], .my-courses__course-card').forEach((card, index) => {
-                if (index >= 20) return; // Limit to 20 courses
+            const courseCards = document.querySelectorAll('[data-purpose="enrolled-course-card"]');
+            console.log(`Found ${courseCards.length} course cards`);
+            
+            courseCards.forEach((card, index) => {
+                // Get title
+                const titleEl = card.querySelector('h3') || card.querySelector('[data-purpose="course-title"]');
+                const title = titleEl?.textContent.trim() || 'Unknown Course';
                 
-                const titleEl = card.querySelector('[data-purpose="course-title"], h3, .course-card--course-title--');
-                const progressEl = card.querySelector('[data-purpose="progress-bar"], .progress-bar');
-                const progressText = progressEl?.getAttribute('aria-valuenow') || progressEl?.style?.width || '0';
-                const progress = parseInt(progressText.replace('%', '')) || 0;
+                // Get progress text - look for "17% completato" or "INIZIA IL CORSO"
+                const cardText = card.textContent;
+                const percentMatch = cardText.match(/(\d+)%\s+completato/i);
+                const isNotStarted = cardText.includes('INIZIA IL CORSO');
                 
+                let progress = 0;
+                if (percentMatch) {
+                    progress = parseInt(percentMatch[1]);
+                } else if (isNotStarted) {
+                    progress = 0;
+                }
+                
+                // Get image and URL
                 const imageEl = card.querySelector('img');
                 const linkEl = card.querySelector('a[href*="/course/"]');
                 
                 const courseData = {
-                    title: titleEl?.textContent.trim() || 'Unknown Course',
+                    title: title,
                     progress: progress,
                     image: imageEl?.src || '',
-                    url: linkEl?.href || ''
+                    url: linkEl?.href || window.location.origin + linkEl?.getAttribute('href') || ''
                 };
                 
                 if (progress >= 100) {
                     completedCourses.push(courseData);
                 } else if (progress > 0) {
                     inProgressCourses.push(courseData);
+                } else {
+                    notStartedCourses.push(courseData);
                 }
             });
             
-            // Calculate weekly learning estimate (you can manually adjust this)
-            const coursesViewedWeekly = Math.min(inProgressCourses.length, 5); // Estimate
+            // If pagination didn't work, use card count
+            if (totalEnrolled === 0) {
+                totalEnrolled = courseCards.length;
+            }
+            
+            console.log(`Total: ${totalEnrolled}, Completed: ${completedCourses.length}, In Progress: ${inProgressCourses.length}, Not Started: ${notStartedCourses.length}`);
             
             // Extract learning stats from dashboard if available
             let totalMinutesLearned = 0;
@@ -132,6 +152,7 @@
                 },
                 completed_courses: completedCourses.slice(0, 10),
                 in_progress_courses: inProgressCourses.slice(0, 10),
+                not_started_courses: notStartedCourses.slice(0, 10),
                 last_updated: new Date().toISOString()
             };
             
@@ -142,11 +163,12 @@
             
             alert('✅ Udemy student data extracted successfully!\n\n' +
                   `Total Courses: ${totalEnrolled}\n` +
+                  `Completed: ${completedCourses.length}\n` +
+                  `In Progress: ${inProgressCourses.length}\n` +
+                  `Not Started: ${notStartedCourses.length}\n\n` +
                   `Weekly Minutes: ${currentMinutes}/${goalMinutes}\n` +
                   `Weekly Visits: ${visitsThisWeek}/${visitsLastWeek}\n` +
-                  `Weekly Streak: ${weeklyStreak} settimane\n` +
-                  `Completed: ${completedCourses.length}\n` +
-                  `In Progress: ${inProgressCourses.length}\n\n` +
+                  `Weekly Streak: ${weeklyStreak} settimane\n\n` +
                   'File downloaded: udemy.json');
             
         } catch (error) {
