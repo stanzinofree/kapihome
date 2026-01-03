@@ -101,6 +101,11 @@ tasks:
     cmds:
       - python3 scripts/update_github_from_json.py {{.CLI_ARGS}}
 
+  import-udemy:
+    desc: Import Udemy student data from JSON file (auto-finds in data_tmp/ or pass path)
+    cmds:
+      - python3 scripts/update_udemy_from_json.py {{.CLI_ARGS}}
+
   update-exercism:
     desc: Complete Exercism data update workflow
     cmds:
