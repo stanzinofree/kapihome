@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/static/css/exercism-card.css">
     <link rel="stylesheet" href="/static/css/github-card.css">
     <link rel="stylesheet" href="/static/css/cal-card.css">
+    <link rel="stylesheet" href="/static/css/udemy-card.css">
     <script src="/static/js/theme-toggle.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
@@ -72,6 +73,11 @@
             <!-- Cal.com Booking Card -->
             <div class="cal-card card-accent-cal" hx-get="/api/cal/mini" hx-trigger="load" hx-swap="innerHTML">
                 <div class="loading">Loading Cal.com</div>
+            </div>
+            
+            <!-- Udemy Instructor Card -->
+            <div class="udemy-card card-accent-udemy" hx-get="/api/udemy/mini" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading Udemy</div>
             </div>
         </main>
     </div>

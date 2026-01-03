@@ -89,7 +89,8 @@ body {
 .linkedin-card,
 .exercism-card,
 .github-card,
-.cal-card {
+.cal-card,
+.udemy-card {
   grid-column: span 4;
   background-color: var(--card) !important;
   color: var(--card-foreground) !important;
@@ -122,6 +123,11 @@ body {
 
 .cal-card:hover {
   box-shadow: 0 8px 24px color-mix(in oklch, var(--cal) 15%, transparent);
+  transform: translateY(-2px);
+}
+
+.udemy-card:hover {
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--udemy) 15%, transparent);
   transform: translateY(-2px);
 }
 
@@ -174,6 +180,16 @@ body {
   right: 0;
   height: 3px;
   background: linear-gradient(90deg, var(--cal), var(--accent));
+}
+
+.card-accent-udemy::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--udemy), var(--accent));
 }
 
 /* Typography */

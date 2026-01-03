@@ -39,6 +39,7 @@
   --exercism: oklch(0.6726 0.2904 341.4084);
   --github: oklch(0.3500 0.0500 260.0000);
   --cal: oklch(0.6500 0.1800 145.0000);
+  --udemy: oklch(0.6000 0.2000 315.0000);
   --cyan: oklch(0.8442 0.1457 209.2851);
   --purple: oklch(0.6726 0.2904 341.4084);
   --pink: oklch(0.6726 0.2904 341.4084);
@@ -85,6 +86,7 @@
   --exercism: oklch(0.6726 0.2904 341.4084);
   --github: oklch(0.5500 0.1000 260.0000);
   --cal: oklch(0.7000 0.2000 145.0000);
+  --udemy: oklch(0.6500 0.2200 315.0000);
   --cyan: oklch(0.8442 0.1457 209.2851);
   --purple: oklch(0.6726 0.2904 341.4084);
   --pink: oklch(0.6726 0.2904 341.4084);
@@ -133,6 +135,7 @@ body {
 .text-exercism { color: var(--exercism); }
 .text-github { color: var(--github); }
 .text-cal { color: var(--cal); }
+.text-udemy { color: var(--udemy); }
 
 .bg-cyan { background-color: var(--cyan); }
 .bg-purple { background-color: var(--purple); }
@@ -141,3 +144,4 @@ body {
 .bg-exercism { background-color: var(--exercism); }
 .bg-github { background-color: var(--github); }
 .bg-cal { background-color: var(--cal); }
+.bg-udemy { background-color: var(--udemy); }

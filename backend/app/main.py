@@ -617,34 +617,30 @@ async def get_github_mini():
 @app.get("/api/cal/mini", response_class=HTMLResponse)
 async def get_cal_mini():
     """
-    Returns Cal.com booking card for homepage
+    Returns Cal.com availability card for homepage
+    Shows upcoming events and availability status
     """
-    # Static data - customize with your Cal.com link
-    booking_url = "https://cal.com/alessandro-middei-8eimru"
-    
-    # You can add real API integration here if needed
-    # For now, showing static CTA
+    # Static data - can be enhanced with real Cal.com API integration
     
     html = f"""
-    <h2 class="card-source-title gradient-text-cal">Book a Call</h2>
+    <h2 class="card-source-title gradient-text-cal">Calendar</h2>
     <div class="cal-content">
         <p class="cal-description">
-            Vuoi discutere un progetto o fare due chiacchiere? 
-            Prenota una call gratuita!
+            Prossimi eventi e disponibilità
         </p>
         
         <div class="cal-features">
             <div class="cal-feature">
                 <span class="cal-icon">📅</span>
-                <span class="cal-text">30 min call</span>
+                <span class="cal-text">30 min slots disponibili</span>
             </div>
             <div class="cal-feature">
                 <span class="cal-icon">🌍</span>
                 <span class="cal-text">Online (Google Meet)</span>
             </div>
             <div class="cal-feature">
-                <span class="cal-icon">💰</span>
-                <span class="cal-text">Gratuito</span>
+                <span class="cal-icon">⏰</span>
+                <span class="cal-text">Lun-Ven 9:00-18:00</span>
             </div>
         </div>
         
@@ -654,15 +650,82 @@ async def get_cal_mini():
             </p>
         </div>
     </div>
-    
-    <div class="card-footer">
-        <a href="{booking_url}" target="_blank" rel="noopener" class="btn btn-primary cal-book-btn">
-            📞 Prenota ora
-        </a>
-    </div>
     """
     
     return HTMLResponse(content=html)
+
+@app.get("/api/udemy/mini", response_class=HTMLResponse)
+async def get_udemy_mini():
+    """
+    Returns Udemy instructor mini stats card for homepage
+    """
+    data_path = Path("/app/data/udemy.json")
+    
+    try:
+        with open(data_path, "r") as f:
+            data = json.load(f)
+        
+        instructor = data.get("instructor", {})
+        stats = data.get("stats", {})
+        courses = data.get("courses", [])
+        
+        # Get top course
+        top_course = courses[0] if courses else {}
+        
+        html = f"""
+        <h2 class="card-source-title gradient-text-udemy">Udemy Instructor</h2>
+        <div class="udemy-stats-mini">
+            <div class="stat-row">
+                <div class="stat-item">
+                    <span class="stat-icon">👨‍🏫</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{stats.get('total_students', 0):,}</span>
+                        <span class="stat-label">Students</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">📚</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{stats.get('total_courses', 0)}</span>
+                        <span class="stat-label">Courses</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-item">
+                    <span class="stat-icon">⭐</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{stats.get('average_rating', 0)}</span>
+                        <span class="stat-label">Avg Rating</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">💬</span>
+                    <div class="stat-content">
+                        <span class="stat-value">{stats.get('total_reviews', 0):,}</span>
+                        <span class="stat-label">Reviews</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <a href="/udemy" class="btn btn-outline">View Courses →</a>
+        </div>
+        """
+        
+        return HTMLResponse(content=html)
+        
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<p class='text-muted-foreground'>Udemy data not available</p>",
+            status_code=404
+        )
+    except Exception as e:
+        return HTMLResponse(
+            content=f"<p class='text-muted-foreground'>Error loading Udemy data</p>",
+            status_code=500
+        )
 
 @app.get("/api/github", response_class=HTMLResponse)
 async def get_github():
