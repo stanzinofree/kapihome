@@ -1,0 +1,140 @@
+/* Cal.com Booking Card */
+.cal-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--cal), var(--accent));
+}
+
+/* Cal Content */
+.cal-content {
+  margin-bottom: 1.5rem;
+}
+
+.cal-description {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* Cal Features */
+.cal-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.cal-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: color-mix(in oklch, var(--cal) 5%, transparent);
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.cal-feature:hover {
+  background: color-mix(in oklch, var(--cal) 10%, transparent);
+  transform: translateX(4px);
+}
+
+.cal-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.cal-text {
+  font-size: 0.9rem;
+  color: var(--card-foreground);
+  font-weight: 500;
+}
+
+/* Cal Availability */
+.cal-availability {
+  padding: 1rem;
+  background: color-mix(in oklch, var(--cal) 8%, transparent);
+  border-left: 3px solid var(--cal);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.cal-availability-text {
+  font-size: 0.9rem;
+  color: var(--card-foreground);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.cal-status {
+  font-size: 0.8rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Cal Book Button */
+.cal-book-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--cal);
+  color: var(--primary-foreground);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.cal-book-btn:hover {
+  background: color-mix(in oklch, var(--cal) 90%, black);
+  box-shadow: 0 4px 16px color-mix(in oklch, var(--cal) 30%, transparent);
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cal-card {
+    padding: 1.5rem;
+  }
+  
+  .cal-features {
+    gap: 0.5rem;
+  }
+  
+  .cal-feature {
+    padding: 0.6rem;
+  }
+  
+  .cal-icon {
+    font-size: 1.25rem;
+  }
+  
+  .cal-text {
+    font-size: 0.85rem;
+  }
+}

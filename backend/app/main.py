@@ -589,6 +589,56 @@ async def get_github_mini():
             status_code=500
         )
 
+@app.get("/api/cal/mini", response_class=HTMLResponse)
+async def get_cal_mini():
+    """
+    Returns Cal.com booking card for homepage
+    """
+    # Static data - customize with your Cal.com link
+    booking_url = "https://cal.com/alessandromiddei"
+    
+    # You can add real API integration here if needed
+    # For now, showing static CTA
+    
+    html = f"""
+    <h2 class="card-source-title gradient-text-cal">Book a Call</h2>
+    <div class="cal-content">
+        <p class="cal-description">
+            Vuoi discutere un progetto o fare due chiacchiere? 
+            Prenota una call gratuita!
+        </p>
+        
+        <div class="cal-features">
+            <div class="cal-feature">
+                <span class="cal-icon">📅</span>
+                <span class="cal-text">30 min call</span>
+            </div>
+            <div class="cal-feature">
+                <span class="cal-icon">🌍</span>
+                <span class="cal-text">Online (Google Meet)</span>
+            </div>
+            <div class="cal-feature">
+                <span class="cal-icon">💰</span>
+                <span class="cal-text">Gratuito</span>
+            </div>
+        </div>
+        
+        <div class="cal-availability">
+            <p class="cal-availability-text">
+                <span class="cal-status">🟢</span> Disponibile questa settimana
+            </p>
+        </div>
+    </div>
+    
+    <div class="card-footer">
+        <a href="{booking_url}" target="_blank" rel="noopener" class="btn btn-primary cal-book-btn">
+            📞 Prenota ora
+        </a>
+    </div>
+    """
+    
+    return HTMLResponse(content=html)
+
 @app.get("/api/github", response_class=HTMLResponse)
 async def get_github():
     """
