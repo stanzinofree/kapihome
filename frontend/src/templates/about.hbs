@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    {{> head title="About Me - Alessandro Middei" extraCSS="about-page"}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    {{> navbar isAbout=true}}
+
+    <div class="container">
+        <main class="content-full">
+            <!-- About Me Infographic Card -->
+            <div class="about-card-full card-accent-primary" hx-get="/api/about-me" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading your story...</div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

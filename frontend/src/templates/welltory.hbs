@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    {{> head title="Welltory Health - KapiHome" extraCSS="welltory-page"}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    {{> navbar isWelltory=true}}
+
+    <div class="container">
+        <main class="content-full">
+            <!-- Welltory Full Data Card -->
+            <div class="welltory-card-full card-accent-welltory" hx-get="/api/welltory" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading Welltory health data...</div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

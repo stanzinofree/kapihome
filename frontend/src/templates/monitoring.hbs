@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    {{> head title="Monitoring - KapiHome" extraCSS="monitoring"}}
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    {{> navbar isMonitoring=true}}
+
+    <main class="container monitoring-container">
+        <header class="page-header">
+            <h1 class="gradient-text">📊 Scraper Monitoring</h1>
+            <p class="subtitle">Track data collection and system performance</p>
+        </header>
+
+        <div id="monitoring-data">
+            <div class="loading">Loading monitoring data...</div>
+        </div>
+    </main>
+
+    <script>
+        async function loadMonitoringData() {
+            try {
+                const response = await fetch('http://localhost:8000/api/monitoring');
+                const data = await response.json();
+                
+                renderMonitoring(data);
+            } catch (error) {
+                document.getElementById('monitoring-data').innerHTML = `
+                    <div class="error-message">
+                        <p>Error loading monitoring data: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMonitoring(data) {
+            const container = document.getElementById('monitoring-data');
+            
+            let html = `
+                <div class="monitoring-header">
+                    <div class="last-update">
+                        Last updated: ${new Date(data.last_updated).toLocaleString('it-IT')}
+                    </div>
+                </div>
+                
+                <div class="scrapers-grid">
+            `;
+            
+            // Render each scraper
+            for (const [key, scraper] of Object.entries(data.scrapers)) {
+                const status = scraper.status === 'active' ? 'active' : 'inactive';
+                const lastExec = scraper.last_execution 
+                    ? new Date(scraper.last_execution).toLocaleString('it-IT')
+                    : 'Never';
+                
+                html += `
+                    <div class="scraper-card ${status}">
+                        <div class="scraper-header">
+                            <h3>${scraper.name}</h3>
+                            <span class="status-badge ${status}">${status}</span>
+                        </div>
+                        
+                        <div class="scraper-info">
+                            <div class="info-row">
+                                <span class="label">Last Execution:</span>
+                                <span class="value">${lastExec}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="current-stats">
+                            <h4>Current Stats</h4>
+                            <div class="stats-list">
+                `;
+                
+                for (const [statKey, statValue] of Object.entries(scraper.current_stats)) {
+                    const label = statKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    html += `
+                        <div class="stat-item">
+                            <span class="stat-label">${label}:</span>
+                            <span class="stat-value">${statValue}</span>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="chart-${key}"></canvas>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // Render charts
+            for (const [key, scraper] of Object.entries(data.scrapers)) {
+                if (scraper.history && scraper.history.length > 0) {
+                    renderChart(key, scraper);
+                }
+            }
+        }
+
+        function renderChart(scraperId, scraper) {
+            const ctx = document.getElementById(`chart-${scraperId}`);
+            if (!ctx) return;
+            
+            // Reverse history to show oldest first
+            const history = [...scraper.history].reverse();
+            
+            // Extract labels (timestamps)
+            const labels = history.map(h => {
+                const date = new Date(h.timestamp);
+                return date.toLocaleDateString('it-IT', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            });
+            
+            // Extract datasets based on available stats
+            const datasets = [];
+            const stats = Object.keys(scraper.current_stats);
+            const colors = [
+                'rgb(54, 162, 235)',   // blue
+                'rgb(255, 99, 132)',   // red
+                'rgb(75, 192, 192)',   // green
+                'rgb(255, 159, 64)',   // orange
+                'rgb(153, 102, 255)',  // purple
+                'rgb(255, 205, 86)'    // yellow
+            ];
+            
+            stats.forEach((stat, index) => {
+                datasets.push({
+                    label: stat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                    data: history.map(h => h[stat] || 0),
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: colors[index % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+                    tension: 0.4
+                });
+            });
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Historical Trend',
+                            color: '#e0e0e0'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load data on page load
+        loadMonitoringData();
+        
+        // Auto-refresh every 2 minutes
+        setInterval(loadMonitoringData, 120000);
+    </script>
+</body>
+</html>

@@ -64,6 +64,11 @@ tasks:
     cmds:
       - docker-compose exec frontend /bin/sh
 
+  shell-scrapers:
+    desc: Open shell in scrapers container
+    cmds:
+      - docker-compose exec scrapers /bin/bash
+
   import-stats:
     desc: Import LinkedIn stats from JSON file (auto-finds in data_tmp/ or pass path)
     cmds:
@@ -106,6 +111,11 @@ tasks:
     cmds:
       - python3 scripts/update_udemy_from_json.py {{.CLI_ARGS}}
 
+  import-welltory:
+    desc: Import Welltory health data from JSON file (auto-finds in data_tmp/ or pass path)
+    cmds:
+      - python3 scripts/update_welltory_from_json.py {{.CLI_ARGS}}
+
   update-exercism:
     desc: Complete Exercism data update workflow
     cmds:
@@ -121,3 +131,56 @@ tasks:
       - echo "   Or pass explicit path> task import-exercism -- ~/Downloads/file.json"
       - echo ""
       - echo "Tampermonkey script> scripts/tampermonkey/"
+
+  setup-rtm:
+    desc: Setup RTM authentication (first time only)
+    cmds:
+      - docker exec -it kapihome-scrapers python rtm_auth.py
+
+  scrape-rtm:
+    desc: Run RTM scraper once (manual)
+    cmds:
+      - docker exec kapihome-scrapers python rtm_scraper.py
+
+  scrape-start:
+    desc: Start scraper service (runs every 10 minutes)
+    cmds:
+      - docker-compose up -d scrapers
+      - echo "Scraper service started (runs every 10 min)"
+      - echo "View logs with> task logs-scrapers"
+
+  scrape-stop:
+    desc: Stop scraper service
+    cmds:
+      - docker-compose stop scrapers
+      - echo "Scraper service stopped"
+
+  logs-scrapers:
+    desc: Show scraper logs
+    cmds:
+      - docker-compose logs -f scrapers
+
+  cache-sync:
+    desc: Force cache sync from data_tmp to data
+    cmds:
+      - docker-compose run --rm scrapers python -c "from cache_manager import CacheManager; CacheManager().sync_all()"
+
+  db-status:
+    desc: Show database statistics
+    cmds:
+      - docker-compose run --rm scrapers python -c "from database import KapiHomeDB; import sqlite3; conn = sqlite3.connect('/app/data/kapihome.db'); cursor = conn.cursor(); cursor.execute('SELECT name FROM sqlite_master WHERE type=\"table\"'); print('Tables:', [r[0] for r in cursor.fetchall()]); cursor.execute('SELECT COUNT(*) FROM rtm_stats_history'); print('RTM stats records:', cursor.fetchone()[0]); conn.close()"
+
+  import-status:
+    desc: Show status of all data sources in data_tmp
+    cmds:
+      - docker-compose run --rm scrapers python -c "from file_scraper import MultiSourceImporter; import json; importer = MultiSourceImporter(); status = importer.get_import_status(); print(json.dumps(status, indent=2))"
+
+  import-now:
+    desc: Force import all data from data_tmp (ignore timestamps)
+    cmds:
+      - docker-compose run --rm scrapers python -c "from file_scraper import MultiSourceImporter; importer = MultiSourceImporter(); importer.force_import_all()"
+
+  import-check:
+    desc: Import only new/updated files from data_tmp
+    cmds:
+      - docker-compose run --rm scrapers python file_scraper.py

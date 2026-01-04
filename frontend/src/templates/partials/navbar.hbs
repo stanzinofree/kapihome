@@ -1,0 +1,27 @@
+<header class="header">
+    <nav class="nav-container">
+        <a href="/" class="logo">KapiHome</a>
+        
+        <ul class="nav-links">
+            <li><a href="/" {{#if isHome}}class="active"{{/if}}>Home</a></li>
+            <li><a href="/linkedin" {{#if isLinkedIn}}class="active"{{/if}}>LinkedIn</a></li>
+            <li><a href="/github" {{#if isGitHub}}class="active"{{/if}}>GitHub</a></li>
+            <li><a href="/exercism" {{#if isExercism}}class="active"{{/if}}>Exercism</a></li>
+            <li><a href="/rtm" {{#if isRTM}}class="active"{{/if}}>Tasks</a></li>
+            <li><a href="/welltory" {{#if isWelltory}}class="active"{{/if}}>Health</a></li>
+            <li><a href="/monitoring" {{#if isMonitoring}}class="active"{{/if}}>Monitoring</a></li>
+            <li><a href="/about" {{#if isAbout}}class="active"{{/if}}>About</a></li>
+        </ul>
+        
+        <div class="nav-external">
+            <a href="https://cv.middei.info" target="_blank" rel="noopener">
+                📄 CV
+            </a>
+            <a href="https://www.linkedin.com/in/stanzinofree/" target="_blank" rel="noopener">
+                💼 LinkedIn
+            </a>
+        </div>
+        
+        <button class="mobile-menu-toggle" aria-label="Toggle menu">☰</button>
+    </nav>
+</header>

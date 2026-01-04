@@ -2,6 +2,13 @@ import Handlebars from "handlebars";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://kapihome-backend:8000";
 
+// Register partials
+const navbarPartial = await Bun.file("src/templates/partials/navbar.hbs").text();
+Handlebars.registerPartial("navbar", navbarPartial);
+
+const headPartial = await Bun.file("src/templates/partials/head.hbs").text();
+Handlebars.registerPartial("head", headPartial);
+
 const server = Bun.serve({
   port: 3000,
   async fetch(req) {
@@ -65,6 +72,50 @@ const server = Bun.serve({
       const templateFile = await Bun.file("src/templates/github.hbs").text();
       const template = Handlebars.compile(templateFile);
       const html = template({ title: "KapiHome - Zen Capibara" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
+    // Serve RTM page
+    if (url.pathname === "/rtm") {
+      const templateFile = await Bun.file("src/templates/rtm.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "KapiHome - Zen Capibara" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
+    // Serve Monitoring page
+    if (url.pathname === "/monitoring") {
+      const templateFile = await Bun.file("src/templates/monitoring.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "KapiHome - Monitoring" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
+    // Serve Welltory page
+    if (url.pathname === "/welltory") {
+      const templateFile = await Bun.file("src/templates/welltory.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "KapiHome - Health" });
+      
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    
+    // Serve About page
+    if (url.pathname === "/about") {
+      const templateFile = await Bun.file("src/templates/about.hbs").text();
+      const template = Handlebars.compile(templateFile);
+      const html = template({ title: "About Me - Alessandro Middei" });
       
       return new Response(html, {
         headers: { "Content-Type": "text/html" },

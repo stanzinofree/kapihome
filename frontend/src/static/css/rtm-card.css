@@ -1,0 +1,411 @@
+/* RTM (Remember The Milk) Card Styles */
+
+.rtm-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.rtm-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FF6B6B, #FFD93D);
+}
+
+.rtm-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.15);
+}
+
+/* Gradient text for RTM */
+.gradient-text-rtm {
+  background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* RTM Stats Mini Grid */
+.rtm-stats-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.rtm-stats-mini .stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.rtm-stats-mini .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: color-mix(in oklch, var(--card-foreground) 3%, transparent);
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.rtm-stats-mini .stat-item:hover {
+  background: color-mix(in oklch, var(--card-foreground) 6%, transparent);
+  transform: translateX(2px);
+}
+
+.rtm-stats-mini .stat-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.rtm-stats-mini .stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.rtm-stats-mini .stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--card-foreground);
+  line-height: 1;
+}
+
+.rtm-stats-mini .stat-label {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* RTM Tasks Preview Section */
+.rtm-tasks-preview {
+  margin: 1.5rem 0 1rem 0;
+  padding: 1rem;
+  background: color-mix(in oklch, var(--card-foreground) 2%, transparent);
+  border-radius: 10px;
+  border-left: 3px solid #FF6B6B;
+}
+
+.rtm-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--card-foreground);
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rtm-task-active,
+.rtm-task-overdue {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+
+.rtm-task-active:hover,
+.rtm-task-overdue:hover {
+  background: color-mix(in oklch, var(--primary) 5%, transparent);
+  transform: translateX(4px);
+}
+
+.rtm-task-overdue {
+  border-left: 3px solid #FF6B6B;
+  background: color-mix(in oklch, #FF6B6B 5%, transparent);
+}
+
+.rtm-task-active:last-child,
+.rtm-task-overdue:last-child {
+  margin-bottom: 0;
+}
+
+.task-priority {
+  font-size: 0.9rem;
+}
+
+.task-name {
+  font-size: 0.85rem;
+  color: var(--card-foreground);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-due {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.no-tasks {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  padding: 1rem;
+  margin: 0;
+}
+
+/* RTM Full Page Styles */
+.rtm-card-full {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.rtm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.rtm-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: color-mix(in oklch, var(--card-foreground) 3%, transparent);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+
+.rtm-stat-card:hover {
+  background: color-mix(in oklch, var(--card-foreground) 6%, transparent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rtm-stat-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.rtm-stat-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rtm-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--card-foreground);
+  line-height: 1;
+}
+
+.rtm-stat-label {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* RTM Tasks Sections */
+.rtm-tasks-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: color-mix(in oklch, var(--card-foreground) 2%, transparent);
+  border-radius: 12px;
+  border-left: 4px solid #FF6B6B;
+}
+
+.rtm-tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.rtm-task-item {
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+
+.rtm-task-item:hover {
+  background: color-mix(in oklch, var(--primary) 5%, transparent);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rtm-task-item.rtm-task-overdue {
+  border-left: 4px solid #FF6B6B;
+  background: color-mix(in oklch, #FF6B6B 5%, transparent);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.task-list-badge {
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
+  background: color-mix(in oklch, var(--primary) 15%, transparent);
+  color: var(--card-foreground);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.task-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.task-tag {
+  padding: 0.2rem 0.6rem;
+  background: color-mix(in oklch, var(--accent) 20%, transparent);
+  color: var(--card-foreground);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* RTM Lists Section */
+.rtm-lists-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: color-mix(in oklch, var(--card-foreground) 2%, transparent);
+  border-radius: 12px;
+}
+
+.rtm-lists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.rtm-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.rtm-list-item:hover {
+  background: color-mix(in oklch, var(--primary) 5%, transparent);
+  transform: translateY(-2px);
+}
+
+.list-name {
+  font-weight: 600;
+  color: var(--card-foreground);
+}
+
+.list-count {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+
+/* RTM Actions */
+.rtm-actions {
+  margin: 2rem 0 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-rtm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-rtm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* RTM Last Update */
+.rtm-last-update {
+  text-align: center;
+  padding: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+.no-content {
+  text-align: center;
+  color: var(--muted-foreground);
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rtm-stats-mini .stat-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .rtm-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-name {
+    font-size: 0.8rem;
+  }
+  
+  .task-due {
+    font-size: 0.65rem;
+  }
+  
+  .task-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

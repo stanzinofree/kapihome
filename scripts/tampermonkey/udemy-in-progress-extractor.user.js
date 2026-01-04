@@ -12,38 +12,14 @@
 (function() {
     'use strict';
 
-    let isLoadingAll = false;
-
-    function createUI() {
-        const container = document.createElement('div');
-        container.style.cssText = `
+    function createExportButton() {
+        const btn = document.createElement('button');
+        btn.innerHTML = '💾 Export In-Progress Courses';
+        btn.style.cssText = `
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        `;
-        
-        const btnLoadAll = document.createElement('button');
-        btnLoadAll.innerHTML = '📜 Load All Courses';
-        btnLoadAll.style.cssText = `
-            padding: 12px 20px;
-            background: #5cb85c;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(92, 184, 92, 0.4);
-            font-size: 14px;
-        `;
-        btnLoadAll.addEventListener('click', loadAllCourses);
-        
-        const btnExport = document.createElement('button');
-        btnExport.innerHTML = '💾 Export In-Progress';
-        btnExport.style.cssText = `
             padding: 12px 20px;
             background: #A435F0;
             color: white;
@@ -54,84 +30,115 @@
             box-shadow: 0 4px 12px rgba(164, 53, 240, 0.4);
             font-size: 14px;
         `;
-        btnExport.addEventListener('click', extractCourses);
-        
-        container.appendChild(btnLoadAll);
-        container.appendChild(btnExport);
-        document.body.appendChild(container);
-        
-        return { btnLoadAll, btnExport };
-    }
-
-    async function loadAllCourses() {
-        if (isLoadingAll) return;
-        isLoadingAll = true;
-        
-        const btn = document.querySelector('button');
-        const originalText = btn.textContent;
-        
-        btn.textContent = '⏳ Scrolling...';
-        btn.disabled = true;
-        
-        // Scroll to bottom multiple times to trigger lazy loading
-        for (let i = 0; i < 50; i++) {
-            window.scrollTo(0, document.body.scrollHeight);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Update button with progress
-            btn.textContent = `⏳ Loading... (${i + 1}/50)`;
-        }
-        
-        // Scroll back to top
-        window.scrollTo(0, 0);
-        
-        btn.textContent = '✅ All Loaded! Now Export';
-        btn.disabled = false;
-        isLoadingAll = false;
-        
-        alert('✅ Finished loading all courses!\n\nNow click "Export In-Progress" to extract data.');
+        btn.addEventListener('click', extractCourses);
+        document.body.appendChild(btn);
     }
 
     function extractCourses() {
         const courses = [];
         
-        // Get all course titles and check their progress
-        const allText = document.body.innerText;
-        const lines = allText.split('\n');
+        // Try different selectors for course cards
+        let courseCards = document.querySelectorAll('[data-purpose="enrolled-course-card"]');
+        if (courseCards.length === 0) {
+            courseCards = document.querySelectorAll('.my-courses--course-card--2YAuJ');
+        }
+        if (courseCards.length === 0) {
+            courseCards = document.querySelectorAll('[class*="course-card"]');
+        }
         
-        let currentCourse = null;
+        console.log('Found course cards:', courseCards.length);
         
-        lines.forEach((line, index) => {
-            // Look for course titles (usually longer text before progress)
-            if (line.length > 20 && line.length < 200 && !line.includes('%') && !line.includes('completato')) {
-                currentCourse = line.trim();
-            }
-            
-            // Look for progress percentage
-            const progressMatch = line.match(/(\d+)%\s*completato/i);
-            if (progressMatch && currentCourse) {
-                const progress = parseInt(progressMatch[1]);
-                if (progress > 0 && progress < 100) {
-                    courses.push({
-                        title: currentCourse,
-                        progress: progress
-                    });
-                    currentCourse = null;
+        if (courseCards.length > 0) {
+            courseCards.forEach((card, index) => {
+                // Try multiple selectors for title
+                let titleEl = card.querySelector('[data-purpose="course-title-url"]');
+                if (!titleEl) titleEl = card.querySelector('h3');
+                if (!titleEl) titleEl = card.querySelector('[class*="course-title"]');
+                
+                // Try multiple selectors for instructor
+                let instructorEl = card.querySelector('[data-purpose="safely-set-inner-html:course-card:visible-instructors"]');
+                if (!instructorEl) instructorEl = card.querySelector('[class*="instructor"]');
+                
+                // Try multiple selectors for progress
+                let progressEl = card.querySelector('[data-purpose="course-card-progress"]');
+                if (!progressEl) progressEl = card.querySelector('[aria-label*="completato"]');
+                if (!progressEl) progressEl = card.querySelector('[class*="progress"]');
+                
+                if (titleEl) {
+                    let title = titleEl.textContent.trim();
+                    let instructor = instructorEl ? instructorEl.textContent.trim() : '';
+                    
+                    // Clean up instructor (remove "Insegnante:" prefix if present)
+                    instructor = instructor.replace(/^Insegnante:\s*/i, '').trim();
+                    
+                    let progress = 0;
+                    if (progressEl) {
+                        const progressText = progressEl.getAttribute('aria-label') || progressEl.textContent;
+                        const match = progressText.match(/(\d+)%/);
+                        if (match) progress = parseInt(match[1]);
+                    }
+                    
+                    // Validate: don't add if instructor looks like a progress text
+                    if (instructor.includes('%') || instructor.toLowerCase().includes('completato')) {
+                        instructor = '';
+                    }
+                    
+                    if (title && progress > 0 && progress < 100) {
+                        courses.push({
+                            title: title,
+                            instructor: instructor,
+                            progress: progress,
+                            order: index
+                        });
+                        console.log(`Course ${index}:`, {title, instructor, progress});
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // Fallback: parse from text
+            const allText = document.body.innerText;
+            const lines = allText.split('\n');
+            
+            let currentCourse = null;
+            let currentInstructor = null;
+            
+            lines.forEach((line, index) => {
+                // Look for course titles
+                if (line.length > 20 && line.length < 200 && !line.includes('%') && !line.includes('completato')) {
+                    currentCourse = line.trim();
+                    // Next line might be instructor
+                    if (index + 1 < lines.length) {
+                        const nextLine = lines[index + 1].trim();
+                        if (nextLine.length > 5 && nextLine.length < 100) {
+                            currentInstructor = nextLine;
+                        }
+                    }
+                }
+                
+                // Look for progress percentage
+                const progressMatch = line.match(/(\d+)%\s*completato/i);
+                if (progressMatch && currentCourse) {
+                    const progress = parseInt(progressMatch[1]);
+                    if (progress > 0 && progress < 100) {
+                        courses.push({
+                            title: currentCourse,
+                            instructor: currentInstructor || '',
+                            progress: progress,
+                            order: courses.length
+                        });
+                        currentCourse = null;
+                        currentInstructor = null;
+                    }
+                }
+            });
+        }
         
-        // Remove duplicates
-        const uniqueCourses = courses.filter((course, index, self) =>
-            index === self.findIndex(c => c.title === course.title)
-        );
-        
-        console.log('Extracted courses:', uniqueCourses);
+        console.log('Extracted courses:', courses);
         
         const data = {
             type: 'in-progress',
-            courses: uniqueCourses,
-            count: uniqueCourses.length,
+            courses: courses, // Keep original order (most recent first)
+            count: courses.length,
             extracted_at: new Date().toISOString()
         };
         
@@ -145,9 +152,9 @@
         a.click();
         URL.revokeObjectURL(url);
         
-        alert(`✅ Exported ${uniqueCourses.length} in-progress courses!\n\nFile: udemy-in-progress.json`);
+        alert(`✅ Exported ${courses.length} in-progress courses!\n\nFile: udemy-in-progress.json\n\nNote: Courses are ordered by most recent access`);
     }
 
     // Initialize after page load
-    setTimeout(createUI, 3000);
+    setTimeout(createExportButton, 3000);
 })();

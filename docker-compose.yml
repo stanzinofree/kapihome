@@ -9,6 +9,8 @@ services:
     volumes:
       - ./backend:/app
       - ./data:/app/data
+    env_file:
+      - .env
     environment:
       - ENVIRONMENT=development
       - DEBUG=true
@@ -27,6 +29,23 @@ services:
       - kapihome-network
     depends_on:
       - backend
+
+  scrapers:
+    build: ./scrapers
+    container_name: kapihome-scrapers
+    volumes:
+      - ./scrapers:/app
+      - ./data:/app/data
+      - ./data_tmp:/app/data_tmp
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+    networks:
+      - kapihome-network
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 networks:
   kapihome-network:

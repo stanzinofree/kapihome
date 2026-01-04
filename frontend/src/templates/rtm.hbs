@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks (RTM) - {{title}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/theme.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+    <link rel="stylesheet" href="/static/css/rtm-card.css">
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="/" class="logo">KapiHome</a>
+            
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/linkedin">LinkedIn</a></li>
+                <li><a href="/github">GitHub</a></li>
+                <li><a href="/exercism">Exercism</a></li>
+                <li><a href="/rtm" class="active">Tasks</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+            
+            <div class="nav-external">
+                <a href="https://cv.middei.info" target="_blank" rel="noopener">
+                    📄 CV
+                </a>
+                <a href="https://www.linkedin.com/in/stanzinofree/" target="_blank" rel="noopener">
+                    💼 LinkedIn
+                </a>
+            </div>
+            
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">☰</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main class="content-full">
+            <!-- RTM Full Data Card -->
+            <div class="rtm-card-full card-accent-rtm" hx-get="/api/rtm" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading Tasks data...</div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

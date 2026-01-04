@@ -1,0 +1,77 @@
+/* Welltory Card Styles */
+.welltory-card {
+  position: relative;
+}
+
+/* Welltory gradient for title */
+.gradient-text-welltory {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Mini stats layout */
+.welltory-stats-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.welltory-stats-mini .stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.welltory-stats-mini .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  border-radius: 10px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s;
+}
+
+.welltory-stats-mini .stat-item:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+  border-color: rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.welltory-stats-mini .stat-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.welltory-stats-mini .stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.welltory-stats-mini .stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--card-foreground);
+  line-height: 1;
+}
+
+.welltory-stats-mini .stat-label {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .welltory-stats-mini .stat-row {
+    grid-template-columns: 1fr;
+  }
+}

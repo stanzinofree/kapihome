@@ -46,6 +46,22 @@ kapihome/
 - Docker & Docker Compose
 - Task (taskfile)
 
+### Configuration
+
+1. **Copy environment file:**
+```bash
+cp .env.example .env
+```
+
+2. **Configure Remember The Milk API:**
+   - Get your API key from: https://www.rememberthemilk.com/services/api/
+   - Edit `.env` and add your credentials:
+   ```
+   RTM_API_KEY=your_actual_api_key
+   RTM_API_SECRET=your_actual_secret
+   ```
+   - ⚠️ **IMPORTANTE**: Il file `.env` è in `.gitignore` e NON verrà mai committato su GitHub
+
 ### Development
 
 ```bash
@@ -72,13 +88,39 @@ task clean
 
 Designed to be served via Nginx Proxy Manager (NPM). Internal services use HTTP, NPM handles HTTPS termination.
 
+## Data Collection System
+
+KapiHome includes an automated scraper service that:
+- ✅ Collects data from RTM (Remember The Milk) every 10 minutes
+- ✅ Automatically caches data from `data_tmp/` to `data/`
+- ✅ Stores historical data in SQLite for analytics
+- 🔄 Planned: LinkedIn, GitHub, Exercism, Udemy scrapers
+
+See [scrapers/README.md](scrapers/README.md) for detailed documentation.
+
+### Quick Start with Scrapers
+
+```bash
+# Setup RTM authentication (first time)
+task setup-rtm
+
+# Start scraper service (every 10 min)
+task scrape-start
+
+# View scraper logs
+task logs-scrapers
+```
+
 ## Roadmap
 
-- [ ] Base structure and styling
-- [ ] First microcard components
-- [ ] Data scrapers (LinkedIn, Exercism, Udemy, RSS)
+- [x] Base structure and styling
+- [x] First microcard components  
+- [x] RTM scraper with auto-caching
+- [x] Historical database (SQLite)
+- [x] Cache management system
+- [ ] LinkedIn, GitHub, Exercism, Udemy scrapers
+- [ ] Analytics dashboard with charts
 - [ ] HTMX interactions and filters
-- [ ] Cache system
 - [ ] NPM deployment config
 
 ## Philosophy

@@ -1,0 +1,242 @@
+/* Welltory Full Page Styles */
+
+.welltory-card-full {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.welltory-card-full::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Stats Grid */
+.welltory-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.welltory-stat-card {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.welltory-stat-card:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.welltory-stat-card.health-score-card {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 85, 247, 0.15));
+  border: 2px solid rgba(236, 72, 153, 0.4);
+  grid-column: span 2;
+}
+
+.welltory-stat-card .stat-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.welltory-stat-card .stat-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.welltory-stat-card .stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--card-foreground);
+  display: block;
+}
+
+.welltory-stat-card .stat-label {
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Health Insights Section */
+.health-insights-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary);
+}
+
+.health-insights-section h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--card-foreground);
+}
+
+.insights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.insights-list li {
+  font-size: 1rem;
+  color: var(--muted-foreground);
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+
+/* Health Metrics Detailed Section */
+.health-metrics-detailed {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.health-metrics-detailed h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+  color: var(--card-foreground);
+  text-align: center;
+  font-weight: 700;
+}
+
+.metrics-explanations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.metric-explain {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.metric-explain:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.metric-explain h4 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  color: var(--card-foreground);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metric-explain .current-value {
+  font-size: 0.95rem;
+  color: var(--primary);
+  margin: 0 0 0.75rem 0;
+  padding: 0.5rem 1rem;
+  background: rgba(236, 72, 153, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary);
+}
+
+.metric-explain .current-value strong {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.metric-explain .explanation {
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.chart-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 300px;
+}
+
+.chart-container canvas {
+  max-height: 250px;
+}
+
+/* Last Update */
+.last-update {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .welltory-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .welltory-stat-card.health-score-card {
+    grid-column: span 1;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .welltory-card-full {
+    padding: 1.5rem;
+  }
+  
+  .welltory-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .charts-grid {
+    gap: 1.5rem;
+  }
+  
+  .chart-container {
+    padding: 1rem;
+  }
+}
